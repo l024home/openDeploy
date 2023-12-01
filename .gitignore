@@ -1,0 +1,55 @@
+# Build and Object Folders
+[Bb]in
+[Bb]in/
+[Oo]bj
+[Oo]bj/
+
+# Build results 
+[Dd]ebug
+[Dd]ebug/
+[Rr]elease
+[Rr]elease/
+x64/
+*.ilk  
+*.meta  
+*.obj  
+*.pch  
+*.pdb  
+*.pgc  
+*.pgd  
+*.rsp  
+*.sbr  
+*.tlb  
+*.tli  
+*.tlh  
+*.tmp  
+*.log  
+*.vspscc  
+*.vssscc  
+.builds
+*.msi
+
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+
+# Nuget packages directory
+packages
+packages/
+
+# Visual Studio profiler  
+.vs
+.vs/
+*.psess  
+*.vsp  
+*.vspx
+
+# DocProject is a documentation generator add-in  
+DocProject/buildhelp/  
+DocProject/Help  
+UpgradeLog*.XML
+
+#Backup file  
+*.bak
+/AppBin
