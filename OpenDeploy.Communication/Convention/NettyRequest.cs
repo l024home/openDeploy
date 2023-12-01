@@ -4,33 +4,29 @@
 public class NettyRequest
 {
     /// <summary> 保存NettyContext的引用 </summary>
-    public NettyContext NettyContext { get; init; }
-
-    /// <summary> 请求的消息 </summary>
-    public NettyMessage Message { get; init; }
+    public NettyContext NettyContext { get; }
 
     /// <summary> 请求的消息头 </summary>
-    public Header Header { get; init; }
+    public NettyHeader Header { get; }
 
     /// <summary> 请求的消息体 </summary>
-    public byte[]? Body { get; init; }
+    public byte[]? Body { get; }
 
     /// <summary> 请求的消息头的原始JSON字符串 </summary>
-    public string RawHeaderString { get; init; }
+    public string RawHeaderString { get; }
 
     /// <summary> 控制器名称 </summary>
-    public string ControllerName { get; init; }
+    public string ControllerName { get; }
 
     /// <summary> 方法名称 </summary>
-    public string ActionName { get; init; }
+    public string ActionName { get; }
 
     public NettyRequest(NettyContext context, NettyMessage message)
     {
         NettyContext = context;
-        Message = message;
-        RawHeaderString = message.Header.ToString();
         Header = message.Header;
         Body = message.Body;
+        RawHeaderString = message.Header.ToString(); 
 
         var splitResult = message.Header.EndPoint.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (splitResult.Length != 2)

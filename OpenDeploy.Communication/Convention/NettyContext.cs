@@ -6,18 +6,18 @@ namespace OpenDeploy.Communication.Convention;
 public class NettyContext
 {
     /// <summary> Netty通道 </summary>
-    public IChannel Channel { get; init; }
+    public IChannel Channel { get; }
 
     /// <summary> Netty请求封装 </summary>
-    public NettyRequest Request { get; init; }
+    public NettyRequest Request { get; }
 
     /// <summary> Netty响应封装 </summary>
-    public NettyResponse Response { get; init; }
+    public NettyResponse Response { get; }
 
     public NettyContext(IChannel channel, NettyMessage message)
     {
         Channel = channel;
         Request = new NettyRequest(this, message);
-        Response = new NettyResponse(this);
+        Response = new NettyResponse(this, message);
     }
 }

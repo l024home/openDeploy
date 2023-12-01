@@ -52,21 +52,32 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
         }
     }
 
-    /// <summary> 发送异步消息(不等待服务器返回) </summary>
+    /// <summary>
+    /// 发送消息
+    /// </summary>
+    /// <param name="endpoint">终结点</param>
+    /// <param name="sync">是否同步等待响应</param>
+    /// <param name="body">正文</param>
+    public async Task SendAsync(string endpoint, bool sync = false, byte[]? body = null)
+    {
+        var message = NettyMessage.Create(endpoint, sync, body);
+        if (sync)
+        {
+            await NettyMessageSynchronizer.SendSync(message, this);
+        }
+        else
+        {
+            await SendAsync(message);
+        }
+    }
+
+    /// <summary>
+    /// 发送消息
+    /// </summary>
     public async Task SendAsync(NettyMessage message)
     {
         await TryConnectAsync();
         await _channel!.WriteAndFlushAsync(message);
-    }
-
-    /// <summary> 发送同步消息(等待服务器返回) </summary>
-    public Task<NettyMessage> SendAndRecieveAsync(NettyMessage message)
-    {
-        if (!message.Header.Sync)
-        {
-            throw new Exception("请在 NettyMessage.Create 中指定消息类型为同步");
-        }
-        return NettyMessageSynchronizer.SendSync(message, this);
     }
 
     /// <summary>

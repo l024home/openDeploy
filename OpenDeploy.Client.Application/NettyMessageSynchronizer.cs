@@ -13,29 +13,24 @@ public static class NettyMessageSynchronizer
     public static async Task<NettyMessage> SendSync(NettyMessage message, NettyClient nettyClient)
     {
         var tcs = new TaskCompletionSource<NettyMessage>();
-        NettyMessage response;
         if (_syncStore.TryAdd(message.Header.RequestId, tcs))
         {
             await nettyClient.SendAsync(message);
-            response = await tcs.Task;
+            return await tcs.Task;
         }
-        else
-        {
-            throw new Exception("SendSync Error: messageId exists");
-        }
-        return response;
+        throw new Exception("SendSync Error: messageId exists");
     }
 
-    public static void TrySetResult(NettyMessage response)
+    public static void TrySetResult(NettyMessage message)
     {
-        if (_syncStore.TryRemove(response.Header.RequestId, out var tcs))
+        if (_syncStore.TryRemove(message.Header.RequestId, out var tcs))
         {
-            tcs.TrySetResult(response);
+            tcs.TrySetResult(message);
         }
     }
 
-    public static bool IsSync(NettyMessage response)
+    public static bool IsSync(NettyMessage message)
     {
-        return _syncStore.ContainsKey(response.Header.RequestId);
+        return _syncStore.ContainsKey(message.Header.RequestId);
     }
 }

@@ -6,11 +6,10 @@ namespace OpenDeploy.Server.Handlers;
 /// <summary>
 /// 回声处理器
 /// </summary>
-public class EchoHandler(NettyContext nettyContext) : AbstractNettyHandler(nettyContext)
+public class EchoHandler(NettyContext context) : AbstractNettyHandler(context)
 {
     public async Task Print()
     {
-        var response = NettyMessage.Create("Echo/Print");
-        await NettyContext.Response.WriteAsync(response);
+        await Response.WriteAsync("Echo/Print");
     }
 }

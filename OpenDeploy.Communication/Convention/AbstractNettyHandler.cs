@@ -5,16 +5,18 @@ using OpenDeploy.Infrastructure;
 namespace OpenDeploy.Communication.Convention;
 
 /// <summary> Netty处理器约定抽象类 </summary>
-public abstract class AbstractNettyHandler(NettyContext nettyContext)
+public abstract class AbstractNettyHandler(NettyContext context)
 {
     /// <summary> Netty上下文 </summary>
-    protected NettyContext NettyContext { get; } = nettyContext;
+    protected NettyContext NettyContext { get; } = context;
+    protected NettyRequest Request => NettyContext.Request;
+    protected NettyResponse Response => NettyContext.Response;
 
     /// <summary> 处理请求 </summary>
     public virtual async Task ProcessAsync()
     {
         //通过ActionName反射获取方法
-        var actionName = NettyContext.Request.ActionName;
+        var actionName = Request.ActionName;
         var bindAttr = BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreReturn;
         MethodInfo? mi = this.GetType().GetMethod(actionName, bindAttr);
         if (mi == null) return;
@@ -27,7 +29,7 @@ public abstract class AbstractNettyHandler(NettyContext nettyContext)
             var parameterInfo = parameterInfos[0];
             try
             {
-                var parameter = JsonSerializer.Deserialize(NettyContext.Request.RawHeaderString, parameterInfo.ParameterType);
+                var parameter = JsonSerializer.Deserialize(Request.RawHeaderString, parameterInfo.ParameterType);
                 if (parameter != null)
                 {
                     parameters = [parameter];

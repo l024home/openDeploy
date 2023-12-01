@@ -1,5 +1,4 @@
-﻿using DotNetty.Handlers.Timeout;
-using DotNetty.Transport.Channels;
+﻿using DotNetty.Transport.Channels;
 using OpenDeploy.Communication.Convention;
 using OpenDeploy.Infrastructure;
 using OpenDeploy.Server.Handlers;
@@ -65,28 +64,5 @@ public class NettyServerMessageEntry : ChannelHandlerAdapter
         await context.CloseAsync();
     }
 
-    /// <summary> 用户事件(可用来处理心跳) </summary>
-    public override async void UserEventTriggered(IChannelHandlerContext context, object evt)
-    {
-        try
-        {
-            if (evt is IdleStateEvent idleStateEvent)
-            {
-                if (idleStateEvent.State == IdleState.ReaderIdle)
-                {
-                    Logger.Write($"Server 主动断开连接");
-                    await context.CloseAsync();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Write(ex.ToString());
-        }
-    }
-
-    public override void ChannelReadComplete(IChannelHandlerContext context)
-    {
-        _ = context.Flush();
-    }
+    public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();
 }

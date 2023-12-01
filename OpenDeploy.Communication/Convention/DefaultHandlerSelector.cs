@@ -12,14 +12,10 @@ public interface INettyHandlerSelector
 /// <summary> 默认的Netty处理器选择器 </summary>
 public class DefaultNettyHandlerSelector : INettyHandlerSelector
 {
-    /// <summary>
-    /// 所有的Netty处理器
-    /// </summary>
+    /// <summary> 已注册的Netty处理器 </summary>
     private readonly List<Type> handlers = [];
 
-    /// <summary>
-    /// 注册Netty处理器
-    /// </summary>
+    /// <summary> 注册Netty处理器 </summary>
     public void RegisterHandlerTypes(IEnumerable<Type> types)
     {
         foreach (var type in types)
@@ -31,9 +27,7 @@ public class DefaultNettyHandlerSelector : INettyHandlerSelector
         }
     }
 
-    /// <summary>
-    /// 选择处理器
-    /// </summary>
+    /// <summary> 选择处理器 </summary>
     public virtual AbstractNettyHandler SelectHandler(NettyContext context)
     {
         //基于约定, 选择类型名称前缀是 ControllerName 的

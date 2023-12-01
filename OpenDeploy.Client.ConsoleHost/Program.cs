@@ -12,13 +12,12 @@ class Program
         {
             using var nettyClient = new NettyClient("127.0.0.1", 20007);
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 50; i++)
             {
                 await Console.Out.WriteLineAsync();
-                Logger.Write("测试同步消息 Before");
-                await nettyClient.SendAndRecieveAsync(NettyMessage.Create("Echo/Print", true));
-                Logger.Write("测试同步消息 After");
-                await Console.Out.WriteLineAsync();
+                Logger.Write("测试消息 Before");
+                await nettyClient.SendAsync("Echo/Print");
+                Logger.Write("测试消息 After");
             }
         }
 

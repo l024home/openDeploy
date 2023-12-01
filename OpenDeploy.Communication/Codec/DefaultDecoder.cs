@@ -20,14 +20,14 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
         var headerBytes = new byte[headerLength];
         input.GetBytes(input.ReaderIndex + 4, headerBytes, 0, headerLength);
 
-        byte[]? bodyArray = null;
+        byte[]? bodyBytes = null;
         string? rawHeaderString = null;
-        Header? header;
+        NettyHeader? header;
 
         try
         {
             rawHeaderString = Encoding.UTF8.GetString(headerBytes);
-            header = JsonSerializer.Deserialize<Header>(rawHeaderString);
+            header = JsonSerializer.Deserialize<NettyHeader>(rawHeaderString);
         }
         catch (Exception ex)
         {
@@ -43,11 +43,15 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
 
         if (bodyLength > 0)
         {
-            bodyArray = new byte[bodyLength];
-            input.GetBytes(input.ReaderIndex + 4 + headerLength, bodyArray, 0, bodyLength);
+            bodyBytes = new byte[bodyLength];
+            input.GetBytes(input.ReaderIndex + 4 + headerLength, bodyBytes, 0, bodyLength);
         }
 
-        var message = NettyMessage.Create(header, bodyArray);
+        var message = new NettyMessage
+        {
+            Header = header,
+            Body = bodyBytes
+        };
 
         output.Add(message);
     }

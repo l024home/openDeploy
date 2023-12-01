@@ -1,14 +1,23 @@
 ﻿namespace OpenDeploy.Communication.Convention;
 
 /// <summary> Netty响应封装 </summary>
-public class NettyResponse(NettyContext context)
+public class NettyResponse(NettyContext context, NettyMessage nettyMessage)
 {
     public NettyContext NettyContext { get; } = context;
+    public NettyMessage RequestMessage { get; } = nettyMessage;
 
-    public async Task WriteAsync(NettyMessage message)
+    public async Task WriteAsync(string endpoint, byte[]? body = null)
     {
-        message.Header.RequestId = NettyContext.Request.Header.RequestId;
-        message.Header.Sync = NettyContext.Request.Header.Sync;
-        await NettyContext.Channel.WriteAndFlushAsync(message);
+        var response = new NettyMessage
+        {
+            Header = new NettyHeader
+            {
+                RequestId = RequestMessage.Header.RequestId,
+                Sync = RequestMessage.Header.Sync,
+                EndPoint = endpoint,
+            },
+            Body = body
+        };
+        await NettyContext.Channel.WriteAndFlushAsync(response);
     }
 }
