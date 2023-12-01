@@ -1,13 +1,14 @@
-# OpenDeploy
+# <font color="blue">OpenDeploy</font>
 
-#### 从零开始打造一个接口自动发布工具
+# 从零开始编写一个接口自动发布工具
 
-#### 技术栈
+## 技术栈
 
-1.  .NET 8.0
-2.  Asp.Net Core WebApi
-3.  WPF 
-4.  DotNetty 
-5.  IIS
-6.  Git
+-   _.NET 8.0_
+-   _Asp.Net Core WebApi_
+-   _WPF_
+-   _DotNetty_
+-   _IIS_
+-   _Git_
 
+## 架构图
