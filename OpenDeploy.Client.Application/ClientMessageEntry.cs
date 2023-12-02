@@ -44,7 +44,7 @@ public class ClientMessageEntry : ChannelHandlerAdapter
             Logger.Info($"收到服务器的消息: {nettyMessage}");
 
             //处理同步消息
-            if (ClientMessageSynchronizer.IsSync(nettyMessage))
+            if (nettyMessage.IsSync())
             {
                 ClientMessageSynchronizer.TrySetResult(nettyMessage);
             }

@@ -1,0 +1,38 @@
+﻿<Window
+    x:Class="OpenDeploy.Client.Windows.LoadingWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:OpenDeploy.Client.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:local="clr-namespace:OpenDeploy.Client.Windows"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="LoadingWindow"
+    Width="800"
+    Height="450"
+    AllowsTransparency="True"
+    Background="{x:Null}"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner"
+    WindowState="Normal"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Grid Background="{x:Null}">
+        <Grid
+            x:Name="LoadingMask"
+            Background="Black"
+            Opacity="0.2" />
+        <!--<controls:RingLoading
+            x:Name="Loading"
+            Width="200"
+            Height="200"
+            IsStart="true"
+            ProgressValue="10" />-->
+
+        <hc:LoadingCircle
+            Width="100"
+            Height="100"
+            DotDiameter="12"
+            Foreground="Yellow" />
+    </Grid>
+</Window>

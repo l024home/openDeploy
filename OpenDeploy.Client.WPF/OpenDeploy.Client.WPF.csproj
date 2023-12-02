@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<RootNamespace>OpenDeploy.Client</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Resources\Images\AutoDeploy.png" />
+	  <None Remove="Resources\Images\favicon.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="HandyControl" Version="3.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\OpenDeploy.Infrastructure\OpenDeploy.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Resources\Images\AutoDeploy.png" />
+	  <Resource Include="Resources\Images\favicon.ico" />
+	</ItemGroup>
+
+</Project>

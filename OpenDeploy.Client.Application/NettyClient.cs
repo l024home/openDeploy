@@ -5,7 +5,6 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using OpenDeploy.Communication.Codec;
 using OpenDeploy.Communication.Convention;
-using OpenDeploy.Infrastructure;
 
 namespace OpenDeploy.Client;
 
@@ -19,7 +18,7 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
 
     private bool _disposed;
     private IChannel? _channel;
-    public bool IsConnected => _channel != null && _channel.Active;
+    public bool IsConnected => _channel != null && _channel.Open;
     public bool IsWritable => _channel != null && _channel.IsWritable;
 
     static NettyClient()

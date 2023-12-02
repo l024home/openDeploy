@@ -35,6 +35,9 @@ public class NettyMessage
         return Encoding.UTF8.GetBytes(headerString);
     }
 
+    /// <summary> 是否同步消息 </summary>
+    public bool IsSync() => Header.Sync;
+
     /// <summary> 创建Netty消息工厂方法 </summary>
     public static NettyMessage Create(string endpoint, bool sync = false, byte[]? body = null)
     {
