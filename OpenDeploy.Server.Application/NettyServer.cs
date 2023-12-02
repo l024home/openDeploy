@@ -27,6 +27,8 @@ public static class NettyServer
             bootstrap
                 .Channel<TcpServerSocketChannel>()
                 .Option(ChannelOption.SoBacklog, 100)
+                .Option(ChannelOption.SoReuseaddr, true)
+                .Option(ChannelOption.SoReuseport, true)
                 .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
                 {
                     IChannelPipeline pipeline = channel.Pipeline;
@@ -34,18 +36,18 @@ public static class NettyServer
                     pipeline.AddLast("framing-dec", new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
                     pipeline.AddLast("decoder", new DefaultDecoder());
                     pipeline.AddLast("encoder", new DefaultEncoder());
-                    pipeline.AddLast("handler", new NettyServerMessageEntry());
+                    pipeline.AddLast("handler", new ServerMessageEntry());
                 }));
 
             var boundChannel = await bootstrap.BindAsync(port);
 
-            Logger.Write($"NettyServer启动成功...{boundChannel}");
+            Logger.Info($"NettyServer启动成功...{boundChannel}");
 
             Console.ReadLine();
 
             await boundChannel.CloseAsync();
 
-            Logger.Write($"NettyServer关闭监听了...{boundChannel}");
+            Logger.Info($"NettyServer关闭监听了...{boundChannel}");
         }
         finally
         {
@@ -54,7 +56,7 @@ public static class NettyServer
                 workerGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1))
             );
 
-            Logger.Write($"NettyServer退出了...");
+            Logger.Info($"NettyServer退出了...");
         }
 
     }

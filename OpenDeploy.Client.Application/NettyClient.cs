@@ -17,14 +17,18 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
     private static readonly Bootstrap bootstrap = new();
     private static readonly IEventLoopGroup eventLoopGroup = new SingleThreadEventLoop();
 
+    private bool _disposed;
     private IChannel? _channel;
     public bool IsConnected => _channel != null && _channel.Active;
+    public bool IsWritable => _channel != null && _channel.IsWritable;
 
     static NettyClient()
     {
         bootstrap
             .Group(eventLoopGroup)
             .Channel<TcpSocketChannel>()
+            .Option(ChannelOption.SoReuseaddr, true)
+            .Option(ChannelOption.SoReuseport, true)
             .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
             {
                 IChannelPipeline pipeline = channel.Pipeline;
@@ -33,7 +37,7 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
                 pipeline.AddLast("framing-dec", new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
                 pipeline.AddLast("decoder", new DefaultDecoder());
                 pipeline.AddLast("encoder", new DefaultEncoder());
-                pipeline.AddLast("handler", new NettyClientMessageEntry());
+                pipeline.AddLast("handler", new ClientMessageEntry());
             }));
     }
 
@@ -44,11 +48,10 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
         {
             if (IsConnected) { return; }
             _channel = await bootstrap.ConnectAsync(ServerEndPoint);
-            Logger.Write("连接服务器成功");
         }
         catch (Exception ex)
         {
-            throw new Exception($"连接服务器失败 : {ServerEndPoint} {ex}");
+            throw new Exception($"连接服务器失败 : {ServerEndPoint} {ex.Message}");
         }
     }
 
@@ -63,7 +66,17 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
         var message = NettyMessage.Create(endpoint, sync, body);
         if (sync)
         {
-            await NettyMessageSynchronizer.SendSync(message, this);
+            var task = ClientMessageSynchronizer.TryAdd(message);
+            try
+            {
+                await SendAsync(message);
+                await task;
+            }
+            catch
+            {
+                ClientMessageSynchronizer.TryRemove(message);
+                throw;
+            }
         }
         else
         {
@@ -74,21 +87,45 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
     /// <summary>
     /// 发送消息
     /// </summary>
-    public async Task SendAsync(NettyMessage message)
+    private async Task SendAsync(NettyMessage message)
     {
         await TryConnectAsync();
         await _channel!.WriteAndFlushAsync(message);
     }
 
-    /// <summary>
-    /// 释放连接
-    /// </summary>
+    /// <summary> 释放连接(程序员手动释放, 一般在代码使用using语句,或在finally里面Dispose) </summary>
     public void Dispose()
     {
+        Dispose(true); 
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary> 释放连接 </summary>
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        //释放托管资源,比如嵌套的对象
+        if (disposing)
+        {
+            
+        }
+
+        //释放非托管资源
         if (_channel != null)
         {
             _channel.CloseAsync();
             _channel = null;
         }
+
+        _disposed = true;
+    }
+
+    ~NettyClient()
+    {
+        Dispose(true);
     }
 }

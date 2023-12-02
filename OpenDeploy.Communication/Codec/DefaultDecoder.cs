@@ -31,13 +31,13 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
         }
         catch (Exception ex)
         {
-            Logger.Write($"解码失败: {rawHeaderString}, {ex}");
+            Logger.Error($"解码失败: {rawHeaderString}, {ex}");
             return;
         }
 
         if (header is null)
         {
-            Logger.Write($"解码失败: {rawHeaderString}");
+            Logger.Error($"解码失败: {rawHeaderString}");
             return;
         }
 
@@ -50,7 +50,7 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
         var message = new NettyMessage
         {
             Header = header,
-            Body = bodyBytes
+            Body = bodyBytes,
         };
 
         output.Add(message);

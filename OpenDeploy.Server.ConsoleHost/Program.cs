@@ -6,10 +6,10 @@ class Program
 {
     static async Task Main()
     {
-        Logger.Write("NettyServer开始启动");
+        Logger.Info("我是服务器");
 
         await NettyServer.RunAsync();
 
-        Logger.Write("NettyServer进程关闭");
+        Logger.Info("服务器进程关闭");
     }
 }

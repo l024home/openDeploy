@@ -4,7 +4,7 @@ using OpenDeploy.Infrastructure;
 
 namespace OpenDeploy.Communication.Convention;
 
-/// <summary> Netty处理器约定抽象类 </summary>
+/// <summary> 约定的Netty处理器抽象类, 所有的Handler必须继承此类, 相当于MVC的Controller </summary>
 public abstract class AbstractNettyHandler(NettyContext context)
 {
     /// <summary> Netty上下文 </summary>
@@ -37,7 +37,7 @@ public abstract class AbstractNettyHandler(NettyContext context)
             }
             catch (Exception ex)
             {
-                Logger.Write(ex.ToString());
+                Logger.Info(ex.ToString());
             }
         }
 
