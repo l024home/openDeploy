@@ -1,7 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<StartupObject>OpenDeploy.Client.Program</StartupObject>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<OutputType>WinExe</OutputType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 		<OutputType>Exe</OutputType>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -10,11 +21,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Images\AutoDeploy.png" />
 	  <None Remove="Resources\Images\favicon.ico" />
+	  <None Remove="Resources\Images\OpenDeploy.png" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 	  <PackageReference Include="HandyControl" Version="3.4.0" />
 	</ItemGroup>
 
@@ -23,8 +35,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="Resources\Images\AutoDeploy.png" />
-	  <Resource Include="Resources\Images\favicon.ico" />
+	  <Resource Include="Resources\Images\OpenDeploy.png" />
+	  <Resource Include="Resources\Images\favicon.ico">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
 	</ItemGroup>
 
 </Project>

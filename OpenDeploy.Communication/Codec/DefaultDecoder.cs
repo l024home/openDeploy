@@ -13,10 +13,16 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
 {
     protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)
     {
-        var totalLength = input.ReadableBytes; //消息总长度
-        var headerLength = input.GetInt(input.ReaderIndex); //消息头长度
-        var bodyLength = totalLength - 4 - headerLength; //消息体长度
+        //消息总长度
+        var totalLength = input.ReadableBytes;
 
+        //消息头长度
+        var headerLength = input.GetInt(input.ReaderIndex);
+
+        //消息体长度
+        var bodyLength = totalLength - 4 - headerLength; 
+
+        //读取消息头字节数组
         var headerBytes = new byte[headerLength];
         input.GetBytes(input.ReaderIndex + 4, headerBytes, 0, headerLength);
 
@@ -26,6 +32,7 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
 
         try
         {
+            //把消息头字节数组,反序列化为JSON
             rawHeaderString = Encoding.UTF8.GetString(headerBytes);
             header = JsonSerializer.Deserialize<NettyHeader>(rawHeaderString);
         }
@@ -41,12 +48,14 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
             return;
         }
 
+        //读取消息体字节数组
         if (bodyLength > 0)
         {
             bodyBytes = new byte[bodyLength];
             input.GetBytes(input.ReaderIndex + 4 + headerLength, bodyBytes, 0, bodyLength);
         }
 
+        //封装为NettyMessage对象
         var message = new NettyMessage
         {
             Header = header,

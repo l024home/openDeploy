@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Threading;
 using HandyControl.Controls;
 using OpenDeploy.Client.Windows;
 using OpenDeploy.Infrastructure;
@@ -7,24 +8,21 @@ namespace OpenDeploy.Client.WPF;
 
 public partial class App : Application
 {
-    private readonly SplashWindow _splashWindow = new SplashWindow();
-
     public App()
     {
-        _splashWindow.Show();
-        Logger.Info($"Client 启动了...");
+        Logger.Info($"App() ...");
+        InitializeComponent();
+        DispatcherUnhandledException += App_DispatcherUnhandledException;
     }
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        DispatcherUnhandledException += App_DispatcherUnhandledException;
-        ShutdownMode = ShutdownMode.OnMainWindowClose;
-        MainWindow = new MainWindow();
+        Logger.Info($"App.OnStartup...");
         MainWindow.Show();
-        _splashWindow.Close();
+        Logger.Info($"MainWindow.Show...");
     }
 
-    private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         try
         {

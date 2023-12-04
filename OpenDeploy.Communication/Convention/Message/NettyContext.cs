@@ -2,7 +2,7 @@
 
 namespace OpenDeploy.Communication.Convention;
 
-/// <summary> Netty连接上下文 </summary>
+/// <summary> Netty连接上下文, 相当于MVC里面的HttpContext </summary>
 public class NettyContext
 {
     /// <summary> Netty通道 </summary>

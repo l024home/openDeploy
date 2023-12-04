@@ -11,7 +11,7 @@
     Width="800"
     Height="450"
     Background="WhiteSmoke"
-    Icon="Resources\Images\favicon.ico"
+    Icon="/Resources/Images/favicon.ico"
     ResizeMode="CanResizeWithGrip"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
