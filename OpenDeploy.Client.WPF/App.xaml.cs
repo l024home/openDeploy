@@ -1,21 +1,32 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
-using HandyControl.Controls;
+using Microsoft.Extensions.Hosting;
 using OpenDeploy.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OpenDeploy.Client.WPF;
 
 public partial class App : Application
 {
+    public IHost AppHost { get; init; } = default!;
+
     public App()
     {
         InitializeComponent();
         DispatcherUnhandledException += App_DispatcherUnhandledException;
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
     }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
+        await AppHost.StartAsync();
+        MainWindow = AppHost.Services.GetRequiredService<MainWindow>();
         MainWindow.Show();
+    }
+
+    protected override async void OnExit(ExitEventArgs e)
+    {
+        await AppHost.StopAsync();
     }
 
     /// <summary>
@@ -27,12 +38,10 @@ public partial class App : Application
         {
             e.Handled = true;
             Logger.Info(e.Exception.ToString());
-            Growl.ErrorGlobal("捕获未处理异常:" + e.Exception.Message);
         }
         catch (Exception ex)
         {
-            Logger.Info(ex.ToString());
-            Growl.ErrorGlobal("程序发生致命错误，将终止，请联系运营商！:" + ex.Message);
+            Logger.Error(ex.ToString());
         }
     }
 }

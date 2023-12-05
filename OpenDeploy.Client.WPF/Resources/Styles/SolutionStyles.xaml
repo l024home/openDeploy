@@ -1,0 +1,312 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:OpenDeploy.Client.Converters"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:o="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+    xmlns:uc="clr-namespace:OpenDeploy.Client.Controls">
+
+    <converters:DataCountToVisibilityConverter x:Key="DataCountToVisibilityConverter" />
+
+    <Style
+        x:Key="Path4GeometryItem"
+        BasedOn="{StaticResource {x:Type Path}}"
+        TargetType="Path">
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Info.Line, RelativeSource={RelativeSource AncestorType=Border}}" Value="True">
+                <Setter Property="Fill" Value="{x:Null}" />
+                <Setter Property="Stroke" Value="{DynamicResource PrimaryBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <DataTemplate x:Key="myHeaderTemplate">
+        <TextBlock
+            Margin="5"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontSize="16"
+            Foreground="DarkBlue"
+            Text="{Binding}" />
+    </DataTemplate>
+
+    <Style x:Key="myHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+        <Setter Property="Background" Value="LightBlue" />
+        <Setter Property="IsEnabled" Value="False" />
+    </Style>
+
+    <Style x:Key="ExpanderBaseStyle_Solution" TargetType="uc:SolutionExpander">
+        <Setter Property="Foreground" Value="{DynamicResource TextIconBrush}" />
+        <Setter Property="Background" Value="{DynamicResource TitleBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="MinHeight" Value="{StaticResource DefaultControlHeight}" />
+        <Setter Property="hc:BorderElement.CornerRadius" Value="{StaticResource DefaultCornerRadius}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="uc:SolutionExpander">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border
+                            x:Name="BorderHeader"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{Binding Path=(hc:BorderElement.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding MinHeight}"
+                                Padding="10,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Focusable="False"
+                                Foreground="{TemplateBinding Foreground}"
+                                IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Style="{StaticResource ToggleButtonCustom}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="32" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        ContentSource="Header" />
+
+                                    <ContentPresenter
+                                        x:Name="ContentPresenterMain"
+                                        Grid.Column="1"
+                                        Content="{TemplateBinding SolutionExpanderButtonAreaContent}"
+                                        WindowChrome.IsHitTestVisibleInChrome="True" />
+
+                                    <Path
+                                        Name="PathArrow"
+                                        Grid.Column="2"
+                                        Width="12"
+                                        Height="12"
+                                        Margin="0,0,10,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        Data="{StaticResource DownGeometry}"
+                                        Fill="{TemplateBinding Foreground}"
+                                        IsHitTestVisible="False" />
+                                </Grid>
+                            </ToggleButton>
+                        </Border>
+                        <ContentPresenter
+                            Name="ExpandSite"
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="true">
+                            <Setter TargetName="BorderHeader" Property="CornerRadius" Value="{Binding Path=(hc:BorderElement.CornerRadius), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource CornerRadiusSplitConverter}, ConverterParameter='1,1,0,0'}" />
+                            <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="PathArrow" Property="Data" Value="{StaticResource UpGeometry}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" Value="2" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SolutionItemsControlBaseStyle" TargetType="ItemsControl">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <StackPanel Margin="15" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate" Value="{DynamicResource SolutionItemTemplate}" />
+    </Style>
+
+    <DataTemplate x:Key="SolutionItemTemplate">
+        <Border>
+            <uc:SolutionExpander
+                Margin="15"
+                hc:BorderElement.CornerRadius="2,2,0,0"
+                Background="Firebrick"
+                Header="lqwawa"
+                IsExpanded="True"
+                Style="{StaticResource ExpanderBaseStyle_Solution}">
+                <Border
+                    Padding="15"
+                    BorderBrush="Firebrick"
+                    BorderThickness="1,0,1,1"
+                    CornerRadius="0,0,4,4">
+
+                    <StackPanel>
+
+
+
+                        <StackPanel Orientation="Vertical">
+
+                            <Grid>
+
+                                <!--  git  -->
+                                <WrapPanel>
+
+                                    <!--  gitk  -->
+                                    <Button
+                                        Margin="0,0,8,0"
+                                        Command="{Binding RunGitKCommand}"
+                                        Content="gitk"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}" />
+
+                                    <!--  git status  -->
+                                    <Button
+                                        Margin="0,0,8,0"
+                                        Command="{Binding RunGitStatusCommand}"
+                                        Content="git status"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}" />
+
+                                    <!--  git add .  -->
+                                    <Button
+                                        Margin="0,0,8,0"
+                                        Command="{Binding RunGitAddCommand}"
+                                        Content="git add"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}" />
+
+                                    <!--  git commit  -->
+                                    <Button
+                                        Margin="0,0,8,0"
+                                        Command="{Binding RunGitCommitCommand}"
+                                        Content="git commit"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}" />
+
+                                    <!--  git pull  -->
+                                    <Button
+                                        Margin="0,0,8,0"
+                                        Command="{Binding RunGitPullCommand}"
+                                        Content="git pull"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}" />
+
+                                    <!--  git push  -->
+                                    <Button
+                                        Margin="0,0,8,0"
+                                        Command="{Binding RunGitPushCommand}"
+                                        Content="git push"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}" />
+
+                                    <!--  git commit 更新API文档  -->
+                                    <Button
+                                        Margin="22,0,8,0"
+                                        Command="{Binding RunGitCommitCommand_UpdateApiDoc}"
+                                        Content="更新API文档"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}"
+                                        Visibility="{Binding GitCommitOptionsVisibility}" />
+
+                                    <TextBox
+                                        Width="250"
+                                        Margin="12,0,8,0"
+                                        Text="{Binding GitCommitMessage}"
+                                        Visibility="{Binding GitCommitOptionsVisibility}" />
+                                    <Button
+                                        Margin="0,0,8,0"
+                                        Command="{Binding RunGitCommitCommand_CustomMsg}"
+                                        Content="提交"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource ButtonDashedSuccess}"
+                                        Visibility="{Binding GitCommitOptionsVisibility}" />
+                                </WrapPanel>
+
+                                <!--  一键发布  -->
+                                <WrapPanel
+                                    Margin="0,0,0,12"
+                                    HorizontalAlignment="Right"
+                                    Visibility="{Binding DeployProjects.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
+
+                                    <Button
+                                        hc:IconElement.Geometry="{StaticResource IconQuickDeployGeometry}"
+                                        Background="{StaticResource SecondaryRegionBrush}"
+                                        Command="{Binding OpenQuickDeploySolutionDialogCommand}"
+                                        Content="一键发布"
+                                        Cursor="Hand"
+                                        FontSize="16"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Style="{StaticResource LinkButtonWithRightIcon}"
+                                        ToolTip="一键发布解决方案" />
+                                </WrapPanel>
+
+                            </Grid>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition Height="200" />
+                                </Grid.RowDefinitions>
+
+                                <!--  项目列表  -->
+                                <ListView
+                                    Grid.Row="0"
+                                    ItemsSource="{Binding DeployProjects}"
+                                    View="{StaticResource SolutionItemGridView}"
+                                    Visibility="{Binding DeployProjects.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
+                                    <ListView.Resources>
+                                        <SolidColorBrush
+                                            x:Key="PrimaryBrush"
+                                            o:Freeze="True"
+                                            Color="{DynamicResource DarkDefaultColor}" />
+                                        <SolidColorBrush
+                                            x:Key="TextIconBrush"
+                                            o:Freeze="True"
+                                            Color="{DynamicResource PrimaryTextColor}" />
+                                    </ListView.Resources>
+                                </ListView>
+
+                                <!--  日志输出  -->
+                                <Grid Grid.Row="1">
+                                    <TextBox
+                                        VerticalContentAlignment="Top"
+                                        AcceptsReturn="True"
+                                        FontFamily="宋体"
+                                        FontSize="14"
+                                        FontWeight="Normal"
+                                        Foreground="Black"
+                                        IsReadOnly="True"
+                                        Text="{Binding LogText}"
+                                        TextWrapping="Wrap"
+                                        VerticalScrollBarVisibility="Auto" />
+                                </Grid>
+
+                            </Grid>
+                        </StackPanel>
+
+                    </StackPanel>
+                </Border>
+            </uc:SolutionExpander>
+        </Border>
+    </DataTemplate>
+
+</ResourceDictionary>

@@ -10,6 +10,9 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
 
                 <ResourceDictionary Source="/Controls/RingLoading.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/Geometries.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/Buttons.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/SolutionStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

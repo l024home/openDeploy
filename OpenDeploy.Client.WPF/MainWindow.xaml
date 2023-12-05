@@ -19,12 +19,15 @@
     mc:Ignorable="d">
     <Grid>
 
-        <Border Padding="15">
+        <!--  配置解决方案占位符  -->
+        <controls:NoSolutionsDisplay Visibility="{Binding Solutions.Count, Converter={StaticResource DataCountToVisibilityConverter}, ConverterParameter=reverse}" />
+
+        <!--  解决方案列表  -->
+        <ScrollViewer Visibility="{Binding Solutions.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
             <StackPanel>
-                <TextBox Text="{Binding Counter}" />
-                <Button Command="{Binding IncrementCounterCommand}" Content="IncrementCounter" />
+                <ItemsControl ItemsSource="{Binding Solutions}" Style="{StaticResource SolutionItemsControlBaseStyle}" />
             </StackPanel>
-        </Border>
+        </ScrollViewer>
 
     </Grid>
 </Window>

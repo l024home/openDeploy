@@ -1,6 +1,26 @@
-﻿using OpenDeploy.Infrastructure;
+﻿using System.Reflection.Metadata;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using OpenDeploy.Client.Demos;
+using OpenDeploy.Infrastructure;
+using OpenDeploy.SQLite;
 
 namespace OpenDeploy.Client.ConsoleHost;
+
+class HostedService : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        Logger.Info("StartAsync");
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        Logger.Info("StopAsync");
+        return Task.CompletedTask;
+    }
+}
 
 class Program
 {
@@ -8,17 +28,19 @@ class Program
     {
         Logger.Info("我是客户端");
 
-        {
-            using var nettyClient = new NettyClient("127.0.0.1", 20007);
-            for (int i = 0; i < 5; i++)
-            {
-                await Console.Out.WriteLineAsync();
-                Logger.Info("发送消息 Before");
-                await nettyClient.SendAsync("Echo/Print", true);
-                Logger.Info("发送消息 After");
-            }
-        }
+        GitDemos.GetChangesSinceLastPublish();
 
-        Console.ReadLine();
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+        builder.Services.AddDbContext<OpenDeployDbContext>();
+        builder.Services.AddTransient<SolutionRepository>();
+        builder.Services.AddHostedService<HostedService>();
+
+        using IHost host = builder.Build();
+
+        Logger.Info("After Build, RunAsync");
+
+        await host.RunAsync();
+
+        Logger.Info("End");
     }
 }
