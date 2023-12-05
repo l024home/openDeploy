@@ -7,9 +7,11 @@
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:local="clr-namespace:OpenDeploy.Client.WPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:OpenDeploy.Client.Models"
     Title="OpenDeploy"
-    Width="800"
-    Height="450"
+    Width="1366"
+    Height="768"
+    d:DataContext="{d:DesignInstance Type=models:MainViewModel}"
     Background="WhiteSmoke"
     Icon="/Resources/Images/favicon.ico"
     ResizeMode="CanResizeWithGrip"
@@ -18,14 +20,11 @@
     <Grid>
 
         <Border Padding="15">
-            <WrapPanel>
-                <Button x:Name="BtnTestLoading" Click="BtnTestLoading_Click">BtnTestLoading</Button>
-            </WrapPanel>
+            <StackPanel>
+                <TextBox Text="{Binding Counter}" />
+                <Button Command="{Binding IncrementCounterCommand}" Content="IncrementCounter" />
+            </StackPanel>
         </Border>
-
-
-
-
 
     </Grid>
 </Window>

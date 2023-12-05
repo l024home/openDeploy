@@ -12,19 +12,14 @@ class Program
     [STAThread]
     public static void Main()
     {
-        Logger.Warn("Main");
-
         //启动画面
-        var splashScreen = new SplashScreen("/Resources/Images/OpenDeploy.png");
-        splashScreen.Show(true, true);
+        new SplashScreen("/Resources/Images/OpenDeploy.png").Show(true, true);
 
         //启动应用程序
-        var app = new App()
+        new App()
         {
             ShutdownMode = ShutdownMode.OnMainWindowClose,
             MainWindow = new MainWindow()
-        };
-        
-        app.Run();
+        }.Run();
     }
 }
