@@ -29,7 +29,9 @@
 
 -   [OpenDeploy: https://gitee.com/broadm-dotnet/OpenDeploy](https://gitee.com/broadm-dotnet/OpenDeploy)
 
-> 欢迎大家拍砖,Star
+-   自动发布工具基于 VS2022 + .NET 8.0 + WPF + DotNetty
+-   待测试的单体 Web 项目是 ASP.NET 4.8 的包含 MVC,WebApi,Webform 等
+-   欢迎大家拍砖,Star
 
 # 计划
 
