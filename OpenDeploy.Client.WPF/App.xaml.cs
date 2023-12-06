@@ -20,6 +20,7 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         await AppHost.StartAsync();
+        //可能比较耗时,加载主窗体可以不采用依赖注入方式, 直接new可以加快启动速度
         MainWindow = AppHost.Services.GetRequiredService<MainWindow>();
         MainWindow.Show();
     }

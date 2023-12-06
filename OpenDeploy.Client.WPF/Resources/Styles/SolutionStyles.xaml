@@ -40,6 +40,7 @@
         <Setter Property="IsEnabled" Value="False" />
     </Style>
 
+    <!--  Expander 样式重写  -->
     <Style x:Key="ExpanderBaseStyle_Solution" TargetType="uc:SolutionExpander">
         <Setter Property="Foreground" Value="{DynamicResource TextIconBrush}" />
         <Setter Property="Background" Value="{DynamicResource TitleBrush}" />
@@ -70,6 +71,7 @@
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
                                 Focusable="False"
+                                FontWeight="Bold"
                                 Foreground="{TemplateBinding Foreground}"
                                 IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                 Style="{StaticResource ToggleButtonCustom}">
@@ -100,7 +102,8 @@
                                         VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                         Data="{StaticResource DownGeometry}"
                                         Fill="{TemplateBinding Foreground}"
-                                        IsHitTestVisible="False" />
+                                        IsHitTestVisible="False"
+                                        Stretch="Uniform" />
                                 </Grid>
                             </ToggleButton>
                         </Border>
@@ -125,6 +128,7 @@
         </Setter>
     </Style>
 
+    <!--  ItemsControl 样式重写  -->
     <Style x:Key="SolutionItemsControlBaseStyle" TargetType="ItemsControl">
         <Setter Property="ItemsPanel">
             <Setter.Value>
@@ -136,13 +140,69 @@
         <Setter Property="ItemTemplate" Value="{DynamicResource SolutionItemTemplate}" />
     </Style>
 
+
+    <GridView
+        x:Key="SolutionItemGridView"
+        AllowsColumnReorder="False"
+        ColumnHeaderContainerStyle="{StaticResource myHeaderStyle}"
+        ColumnHeaderTemplate="{StaticResource myHeaderTemplate}">
+
+        <GridViewColumn
+            Width="50"
+            DisplayMemberBinding="{Binding ProjectIndex}"
+            Header="编号" />
+        <GridViewColumn
+            Width="120"
+            DisplayMemberBinding="{Binding ProjectName}"
+            Header="项目名称" />
+        <GridViewColumn
+            Width="80"
+            DisplayMemberBinding="{Binding SolutionName}"
+            Header="解决方案" />
+        <GridViewColumn
+            Width="450"
+            DisplayMemberBinding="{Binding ProjectPath}"
+            Header="项目路径" />
+        <GridViewColumn Width="60" Header="状态">
+            <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Path
+                            Data="{Binding ProjectStatus.Data}"
+                            Fill="{Binding ProjectStatus.Fill}"
+                            Style="{StaticResource Path4GeometryItem}" />
+                    </StackPanel>
+                </DataTemplate>
+            </GridViewColumn.CellTemplate>
+        </GridViewColumn>
+        <GridViewColumn Width="200" Header="操作">
+            <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,15,0"
+                            Command="{Binding OpenProjectFolderCommand}"
+                            Content="打开" />
+                        <Button
+                            Margin="0,0,15,0"
+                            Command="{Binding OpenEditProjectDialogCommand}"
+                            Content="配置" />
+                        <Button Command="{Binding OpenDeployProjectDialogCommand}" Content="发布" />
+                    </StackPanel>
+                </DataTemplate>
+            </GridViewColumn.CellTemplate>
+        </GridViewColumn>
+    </GridView>
+
+    <!--  ItemTemplate 样式重写  -->
     <DataTemplate x:Key="SolutionItemTemplate">
         <Border>
             <uc:SolutionExpander
                 Margin="15"
                 hc:BorderElement.CornerRadius="2,2,0,0"
                 Background="Firebrick"
-                Header="lqwawa"
+                Foreground="White"
+                Header="{Binding SolutionName}"
                 IsExpanded="True"
                 Style="{StaticResource ExpanderBaseStyle_Solution}">
                 <Border
@@ -192,7 +252,7 @@
                                     <!--  git commit  -->
                                     <Button
                                         Margin="0,0,8,0"
-                                        Command="{Binding RunGitCommitCommand}"
+                                        Command="{Binding OpenGitCommitCommand}"
                                         Content="git commit"
                                         Cursor="Hand"
                                         Foreground="{DynamicResource PrimaryBrush}"
@@ -216,16 +276,6 @@
                                         Foreground="{DynamicResource PrimaryBrush}"
                                         Style="{StaticResource ButtonDashedSuccess}" />
 
-                                    <!--  git commit 更新API文档  -->
-                                    <Button
-                                        Margin="22,0,8,0"
-                                        Command="{Binding RunGitCommitCommand_UpdateApiDoc}"
-                                        Content="更新API文档"
-                                        Cursor="Hand"
-                                        Foreground="{DynamicResource PrimaryBrush}"
-                                        Style="{StaticResource ButtonDashedSuccess}"
-                                        Visibility="{Binding GitCommitOptionsVisibility}" />
-
                                     <TextBox
                                         Width="250"
                                         Margin="12,0,8,0"
@@ -233,7 +283,7 @@
                                         Visibility="{Binding GitCommitOptionsVisibility}" />
                                     <Button
                                         Margin="0,0,8,0"
-                                        Command="{Binding RunGitCommitCommand_CustomMsg}"
+                                        Command="{Binding RunGitCommitCommand}"
                                         Content="提交"
                                         Cursor="Hand"
                                         Foreground="{DynamicResource PrimaryBrush}"
@@ -267,29 +317,12 @@
                                     <RowDefinition Height="200" />
                                 </Grid.RowDefinitions>
 
-                                <!--  项目列表  -->
-                                <ListView
-                                    Grid.Row="0"
-                                    ItemsSource="{Binding DeployProjects}"
-                                    View="{StaticResource SolutionItemGridView}"
-                                    Visibility="{Binding DeployProjects.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
-                                    <ListView.Resources>
-                                        <SolidColorBrush
-                                            x:Key="PrimaryBrush"
-                                            o:Freeze="True"
-                                            Color="{DynamicResource DarkDefaultColor}" />
-                                        <SolidColorBrush
-                                            x:Key="TextIconBrush"
-                                            o:Freeze="True"
-                                            Color="{DynamicResource PrimaryTextColor}" />
-                                    </ListView.Resources>
-                                </ListView>
-
                                 <!--  日志输出  -->
                                 <Grid Grid.Row="1">
                                     <TextBox
                                         VerticalContentAlignment="Top"
                                         AcceptsReturn="True"
+                                        Focusable="True"
                                         FontFamily="宋体"
                                         FontSize="14"
                                         FontWeight="Normal"

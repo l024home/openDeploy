@@ -3,32 +3,29 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using OpenDeploy.Client.Dialogs;
-using OpenDeploy.Domain.Models;
 using OpenDeploy.Infrastructure;
 using OpenDeploy.SQLite;
 
 namespace OpenDeploy.Client.Models;
 
 /// <summary> 主窗体视图模型 </summary>
-public partial class MainViewModel : ObservableObject
+public partial class MainViewModel(SolutionRepository solutionRepository) : ObservableObject
 {
     /// <summary> 解决方案仓储 </summary>
-    public SolutionRepository SolutionRepository { get; }
+    private readonly SolutionRepository solutionRepository = solutionRepository;
 
     /// <summary> 解决方案集合 </summary>
     [ObservableProperty]
-    private ObservableCollection<SolutionViewModel> solutions;
+    private ObservableCollection<SolutionViewModel> solutions = default!;
 
     /// <summary> 临时解决方案(用于配置) </summary>
     [ObservableProperty]
-    private SolutionViewModel configSolution;
+    private SolutionViewModel configSolution = default!;
 
-    public MainViewModel(SolutionRepository solutionRepository)
+    /// <summary> 初始化解决方案 </summary>
+    public void InitSolutions()
     {
-        SolutionRepository = solutionRepository;
-        configSolution = new SolutionViewModel();
-
-        //加载已配置的解决方案
+        ConfigSolution = new SolutionViewModel();
         var solutionEntities = solutionRepository.GetSolutions();
         var solutionViewModels = solutionEntities.Select(a => new SolutionViewModel
         {
@@ -36,12 +33,10 @@ public partial class MainViewModel : ObservableObject
             GitRepositoryPath = a.GitRepositoryPath,
             SolutionName = a.SolutionName,
         });
-        solutions = new ObservableCollection<SolutionViewModel>(solutionViewModels);
+        Solutions = new ObservableCollection<SolutionViewModel>(solutionViewModels);
     }
 
-    /// <summary>
-    /// 打开配置解决方案弹窗
-    /// </summary>
+    /// <summary> 打开配置解决方案弹窗 </summary>
     [RelayCommand]
     public void OpenConfigSolutionDialog()
     {
@@ -49,10 +44,7 @@ public partial class MainViewModel : ObservableObject
         Dialog.Show(new SolutionConfigDialog(this));
     }
 
-
-    /// <summary>
-    /// 确定配置解决方案
-    /// </summary>
+    /// <summary> 确定配置解决方案 </summary>
     [RelayCommand]
     private void OkConfigSolution()
     {
@@ -69,16 +61,16 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Logger.Error(ex.Message);
+            Growl.ClearGlobal();
             Growl.WarningGlobal(ex.Message);
             return;
         }
 
+        //持久化到Sqlite
+        solutionRepository.AddSolution(ConfigSolution.Map2Entity());
+
         Growl.SuccessGlobal("操作成功");
 
-
-        ConfigSolution.Id = 0;
-        ConfigSolution.SolutionName = "";
-        ConfigSolution.GitRepositoryPath = "";
+        ConfigSolution.Clear();
     }
 }
