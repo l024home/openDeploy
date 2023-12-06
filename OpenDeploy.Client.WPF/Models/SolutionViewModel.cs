@@ -2,6 +2,7 @@
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HandyControl.Controls;
 using OpenDeploy.Client.Helper;
 using OpenDeploy.Client.Windows;
 using OpenDeploy.Domain.Models;
@@ -15,9 +16,11 @@ public partial class SolutionViewModel : ObservableObject
     [ObservableProperty]
     private int id;
 
+    /// <summary> 解决方案名称 </summary>
     [ObservableProperty]
     private string solutionName = string.Empty;
 
+    /// <summary> 解决方案Git仓储路径 </summary>
     [ObservableProperty]
     public string gitRepositoryPath = string.Empty;
 
@@ -40,6 +43,13 @@ public partial class SolutionViewModel : ObservableObject
         return solution;
     }
 
+
+    /// <summary> 打开一键发布弹窗 </summary>
+    [RelayCommand]
+    public void OpenQuickDeploySolutionDialog()
+    {
+        Growl.InfoGlobal("打开一键发布弹窗");
+    }
 
     #region Git相关命令
 

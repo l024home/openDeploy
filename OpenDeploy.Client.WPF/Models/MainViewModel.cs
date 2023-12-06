@@ -18,14 +18,19 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
     [ObservableProperty]
     private ObservableCollection<SolutionViewModel> solutions = default!;
 
-    /// <summary> 临时解决方案(用于配置) </summary>
+    /// <summary> 临时解决方案(用于新增配置) </summary>
     [ObservableProperty]
-    private SolutionViewModel configSolution = default!;
+    private SolutionViewModel configSolution = new ();
 
     /// <summary> 初始化解决方案 </summary>
     public void InitSolutions()
     {
-        ConfigSolution = new SolutionViewModel();
+        LoadSolutions();
+    }
+
+    /// <summary> 加载解决方案 </summary>
+    private void LoadSolutions()
+    {
         var solutionEntities = solutionRepository.GetSolutions();
         var solutionViewModels = solutionEntities.Select(a => new SolutionViewModel
         {
@@ -36,12 +41,16 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
         Solutions = new ObservableCollection<SolutionViewModel>(solutionViewModels);
     }
 
+
+    /// <summary> 配置解决方案弹窗 </summary>
+    private Dialog? configSolutionDialog;
+
     /// <summary> 打开配置解决方案弹窗 </summary>
     [RelayCommand]
     public void OpenConfigSolutionDialog()
     {
-        Logger.Warn("OpenConfigSolutionDialog");
-        Dialog.Show(new SolutionConfigDialog(this));
+        ConfigSolution.Clear();
+        configSolutionDialog = Dialog.Show(new SolutionConfigDialog(this));
     }
 
     /// <summary> 确定配置解决方案 </summary>
@@ -71,6 +80,10 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
 
         Growl.SuccessGlobal("操作成功");
 
-        ConfigSolution.Clear();
+        //重新加载解决方案
+        LoadSolutions();
+
+        //关闭弹窗
+        configSolutionDialog?.Close();
     }
 }
