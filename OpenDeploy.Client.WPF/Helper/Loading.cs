@@ -11,7 +11,7 @@ public static class Loading
     /// <param name="owner">Loading所有者</param>
     /// <param name="timeout">Loading超时时间/毫秒</param>
     /// <returns>Loading窗体</returns>
-    public static LoadingWindow Show(Window? owner = null, int timeout = 1000)
+    public static LoadingWindow Show(Window? owner = null, int timeout = 5000)
     {
         owner ??= Application.Current.MainWindow;
         var loadingWindow = new LoadingWindow(owner, timeout);
