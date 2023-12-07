@@ -126,6 +126,35 @@ public class GitHelper
     }
 
 
+    /// <summary>
+    /// 获取自上次提交以来的改动
+    /// </summary>
+    public static List<PatchEntryChanges> GetChangesSinceLastPublish(string repoPath, string? lastCommitId = null)
+    {
+        var repo = GetRepo(repoPath);
+
+        //获取上次发布的提交
+        Commit? lastCommit;
+        if (string.IsNullOrEmpty(lastCommitId))
+        {
+            lastCommit = repo.Commits.LastOrDefault();
+        }
+        else
+        {
+            lastCommit = repo.Lookup<Commit>(lastCommitId);
+        }
+
+        if (lastCommit == null)
+        {
+            throw new Exception("暂无提交记录");
+        }
+
+        //获取自上次提交以来的改动
+        var diff = repo.Diff.Compare<Patch>(lastCommit.Tree, DiffTargets.Index);
+        return [.. diff];
+    }
+
+
     public class CommitInfoDto
     {
         public string Name { get; set; } = default!;

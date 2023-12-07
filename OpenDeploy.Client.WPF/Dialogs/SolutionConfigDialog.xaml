@@ -8,8 +8,7 @@
     xmlns:models="clr-namespace:OpenDeploy.Client.Models"
     xmlns:o="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     Width="600"
-    Height="300"
-    Padding="15"
+    Height="200"
     d:DataContext="{d:DesignInstance Type=models:MainViewModel}"
     hc:Dialog.Token="DialogContainer"
     Background="White"
@@ -22,38 +21,32 @@
             o:Freeze="True"
             Color="{DynamicResource RegionColor}" />
     </Border.Resources>
+
     <hc:DialogContainer>
         <hc:SimplePanel>
 
-            <StackPanel Margin="25,25,25,65">
+            <StackPanel Margin="25">
                 <TextBox
-                    Margin="0,15,0,0"
-                    hc:InfoElement.Title="解决方案名称"
-                    Style="{StaticResource TextBoxExtend}"
-                    Text="{Binding ConfigSolution.SolutionName}" />
-
-                <TextBox
-                    Margin="0,15,0,0"
+                    Margin="0,25,0,0"
                     hc:InfoElement.Title="解决方案Git路径"
                     Style="{StaticResource TextBoxExtend}"
-                    Text="{Binding ConfigSolution.GitRepositoryPath}" />
+                    Text="{Binding SolutionGitPath}" />
             </StackPanel>
 
             <!--  确定,取消  -->
             <StackPanel
-                Margin="0,0,0,25"
+                Margin="0,0,0,15"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 Orientation="Horizontal">
                 <Button
                     Width="120"
-                    Margin="0,32,32,0"
+                    Margin="0,0,32,0"
                     Command="hc:ControlCommands.Close"
                     Content="取消"
                     Style="{StaticResource ButtonInfo}" />
                 <Button
                     Width="120"
-                    Margin="0,32,0,0"
                     Command="{Binding OkConfigSolutionCommand}"
                     Content="确定"
                     Style="{StaticResource ButtonPrimary}" />

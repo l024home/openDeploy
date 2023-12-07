@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenDeploy.Infrastructure\OpenDeploy.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

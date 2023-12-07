@@ -3,10 +3,16 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
+using LibGit2Sharp;
+using Microsoft.Extensions.DependencyInjection;
+using OpenDeploy.Client.Dialogs;
 using OpenDeploy.Client.Helper;
 using OpenDeploy.Client.Windows;
+using OpenDeploy.Client.WPF;
+using OpenDeploy.Domain.Convention;
 using OpenDeploy.Domain.Models;
 using OpenDeploy.Infrastructure;
+using OpenDeploy.SQLite;
 
 namespace OpenDeploy.Client.Models;
 
@@ -23,6 +29,21 @@ public partial class SolutionViewModel : ObservableObject
     /// <summary> 解决方案Git仓储路径 </summary>
     [ObservableProperty]
     public string gitRepositoryPath = string.Empty;
+
+    /// <summary> 解决方案上次发布时间 </summary>
+    [ObservableProperty]
+    private string lastPublishTime = string.Empty;
+
+
+    /// <summary> 是否没有改动 </summary>
+    [ObservableProperty]
+    private Visibility noChanged = Visibility.Hidden;
+
+    /// <summary> 自上次发布以来的改动 </summary>
+    [ObservableProperty]
+    private List<PatchEntryChanges>? changesSinceLastCommit;
+
+
 
     /// <summary> 清空模型 </summary>
     public void Clear()
@@ -44,11 +65,71 @@ public partial class SolutionViewModel : ObservableObject
     }
 
 
+    /// <summary> 一键发布解决方案弹窗 </summary>
+    private Dialog? quickDeployDialog;
+
     /// <summary> 打开一键发布弹窗 </summary>
     [RelayCommand]
     public void OpenQuickDeploySolutionDialog()
     {
-        Growl.InfoGlobal("打开一键发布弹窗");
+        var solutionRepo = ((App)Application.Current).AppHost.Services.GetRequiredService<SolutionRepository>();
+        var lastCommit = solutionRepo.GetLastCommit(Id);
+        if (lastCommit != null)
+        {
+            LastPublishTime = lastCommit.PublishTime.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+        else
+        {
+            LastPublishTime = "暂无发布记录";
+        }
+
+        //获取自上次提交以来的改动
+        var diff = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastCommit?.GitCommitId);
+        if (diff == null || diff.Count == 0)
+        {
+            Growl.WarningGlobal("暂无提交记录");
+            return;
+        }
+
+        ChangesSinceLastCommit = diff;
+
+        GetDeployFileInfos(diff.Select(a=>a.Path));
+
+        quickDeployDialog = Dialog.Show(new QuickDeployDialog(this));
+    }
+
+
+    /// <summary>
+    /// Git修改记录 => 待发布文件集合
+    /// </summary>
+    private static void GetDeployFileInfos(IEnumerable<string> changedFilePaths)
+    {
+        var deployFileInfos = new List<DeployFileInfo>();
+        foreach (string changedPath in changedFilePaths)
+        {
+            var fi = DeployFileInfo.Create(changedPath);
+            if (fi.IsUnKnown) continue;
+            deployFileInfos.Add(fi);
+        }
+
+        foreach (var fi in deployFileInfos)
+        {
+            Logger.Info(fi.ToString());
+
+            //if (fi.IsDLL)
+            //{
+            //    var dllPath = Solution.DeployProjects.Where(a => a.ProjectName == fi.ProjectName).Select(a => a.ProjectDLLPath).FirstOrDefault();
+            //    if (!string.IsNullOrEmpty(dllPath))
+            //    {
+            //        fi.AbsoluteFilePath = Path.Combine(dllPath, fi.FileName);
+            //    }
+            //}
+            //else
+            //{
+            //    fi.AbsoluteFilePath = Path.Combine(Solution.SolutionPath, fi.ChangedFilePath);
+            //}
+        }
+        //return deployFileInfos.Distinct(new DeployFileInfoComparer()).ToList();
     }
 
     #region Git相关命令
@@ -134,8 +215,8 @@ public partial class SolutionViewModel : ObservableObject
             _process.StartInfo.WorkingDirectory = GitRepositoryPath;
             _process.StartInfo.FileName = "cmd.exe";
             _process.StartInfo.Arguments = "/C " + cmd;
-            _process.StartInfo.UseShellExecute = false;//是否使用操作系统shell启动
-            _process.StartInfo.CreateNoWindow = true;//不显示程序窗口
+            _process.StartInfo.UseShellExecute = false;
+            _process.StartInfo.CreateNoWindow = true;
             _process.StartInfo.RedirectStandardInput = true;
             _process.StartInfo.RedirectStandardOutput = true;
             _process.StartInfo.RedirectStandardError = true;

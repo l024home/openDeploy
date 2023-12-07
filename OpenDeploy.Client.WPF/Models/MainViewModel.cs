@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using OpenDeploy.Client.Dialogs;
+using OpenDeploy.Domain.Models;
 using OpenDeploy.Infrastructure;
 using OpenDeploy.SQLite;
 
@@ -18,12 +20,12 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
     [ObservableProperty]
     private ObservableCollection<SolutionViewModel> solutions = default!;
 
-    /// <summary> 临时解决方案(用于新增配置) </summary>
+    /// <summary> 解决方案Git路径 </summary>
     [ObservableProperty]
-    private SolutionViewModel configSolution = new ();
+    private string solutionGitPath = string.Empty;
 
-    /// <summary> 初始化解决方案 </summary>
-    public void InitSolutions()
+    /// <summary> 初始化 </summary>
+    public void Init()
     {
         LoadSolutions();
     }
@@ -49,7 +51,7 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
     [RelayCommand]
     public void OpenConfigSolutionDialog()
     {
-        ConfigSolution.Clear();
+        SolutionGitPath = string.Empty;
         configSolutionDialog = Dialog.Show(new SolutionConfigDialog(this));
     }
 
@@ -59,11 +61,7 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
     {
         try
         {
-            if (string.IsNullOrEmpty(ConfigSolution.SolutionName))
-            {
-                throw new Exception("请填写解决方案名称");
-            }
-            if (!GitHelper.IsValidRepository(ConfigSolution.GitRepositoryPath))
+            if (!GitHelper.IsValidRepository(SolutionGitPath))
             {
                 throw new Exception("非法的Git仓储路径");
             }
@@ -75,8 +73,10 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
             return;
         }
 
+        var solution = DetectSolution(SolutionGitPath);
+
         //持久化到Sqlite
-        solutionRepository.AddSolution(ConfigSolution.Map2Entity());
+        solutionRepository.AddSolution(solution);
 
         Growl.SuccessGlobal("操作成功");
 
@@ -85,5 +85,51 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
 
         //关闭弹窗
         configSolutionDialog?.Close();
+    }
+
+
+    /// <summary>
+    /// 发现解决方案
+    /// </summary>
+    private static Solution DetectSolution(string gitRepoPath)
+    {
+        string[] solutionFilePaths = Directory.GetFiles(gitRepoPath, "*.sln", SearchOption.AllDirectories);
+        if (solutionFilePaths == null || solutionFilePaths.Length == 0)
+        {
+            throw new Exception("未找到解决方案");
+        }
+        string[] projectFilePaths = Directory.GetFiles(gitRepoPath, "*.csproj", SearchOption.AllDirectories);
+        if (projectFilePaths == null || projectFilePaths.Length == 0)
+        {
+            throw new Exception("未找到项目");
+        }
+
+        var solutionFilePath = solutionFilePaths[0];
+        var solutionDir = Path.GetDirectoryName(solutionFilePath);
+        var solutionName = Path.GetFileNameWithoutExtension(solutionFilePath);
+
+        var solution = new Solution
+        {
+            GitRepositoryPath = gitRepoPath,
+            SolutionDir = solutionDir!,
+            SolutionName = solutionName
+        };
+
+        foreach (var projectFilePath in projectFilePaths)
+        {
+            var projectDir = Path.GetDirectoryName(projectFilePath);
+            var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+            var webConfigFiles = Directory.GetFiles(projectDir!, "web.config", SearchOption.TopDirectoryOnly);
+            var project = new Project
+            {
+                ProjectDir = projectDir!,
+                ProjectName = projectName,
+                IsWeb = webConfigFiles != null && webConfigFiles.Length > 0,
+                SolutionName = solutionName,
+                ReleaseDir = string.Empty
+            };
+            solution.Projects.Add(project);
+        }
+        return solution;
     }
 }

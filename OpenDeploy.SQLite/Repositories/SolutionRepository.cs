@@ -1,4 +1,5 @@
-﻿using OpenDeploy.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using OpenDeploy.Domain.Models;
 
 namespace OpenDeploy.SQLite;
 
@@ -23,6 +24,12 @@ public class SolutionRepository
     /// <summary> 获取所有的解决方案 </summary>
     public List<Solution> GetSolutions()
     {
-        return [.. context.Solutions];
+        return [.. context.Solutions.Include(a => a.Projects)];
+    }
+
+    /// <summary> 获取上次的提交记录 </summary>
+    public PublishRecord? GetLastCommit(int solutionId)
+    {
+        return context.PublishRecords.Where(a => a.SolutionId == solutionId).OrderByDescending(a => a.PublishTime).FirstOrDefault();
     }
 }

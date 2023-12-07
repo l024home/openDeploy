@@ -8,21 +8,28 @@ namespace OpenDeploy.Client.Demos;
 /// </summary>
 public class GitDemos
 {
-    static string repoPath = "D:\\Projects\\Back\\dotnet\\Study\\OpenDeploy.TestWebProject";
-    static string id = "fd67a7c800ce2f305fd11ace7aae85a5a4554b99";
+
 
     /// <summary>
     /// 获取自上次提交以来的改动
     /// </summary>
-    public static void GetChangesSinceLastPublish()
+    public static void GetChangesSinceLastPublish(string repoPath, string? id = null)
     {
         using var repo = new Repository(repoPath);
 
-        //获取上次发布的提交
-        var parentCommit = repo.Lookup<Commit>(id);
+        //获取上次提交
+        Commit? lastCommit;
+        if (!string.IsNullOrEmpty(id))
+        {
+            lastCommit = repo.Lookup<Commit>(id);
+        }
+        else
+        {
+            lastCommit = repo.Commits.Last();
+        }
 
         //获取自上次提交以来的改动
-        var diff = repo.Diff.Compare<Patch>(parentCommit.Tree, DiffTargets.Index);
+        var diff = repo.Diff.Compare<Patch>(lastCommit.Tree, DiffTargets.Index);
 
         Logger.Info("自上次提交以来的改动:");
 

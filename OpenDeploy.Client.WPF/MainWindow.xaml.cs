@@ -21,7 +21,7 @@ public partial class MainWindow : System.Windows.Window
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         Logger.Info("MainWindow Loaded");
-        mainViewModel.InitSolutions();
+        mainViewModel.Init();
     }
 
 }
