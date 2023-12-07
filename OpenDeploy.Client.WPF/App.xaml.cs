@@ -8,13 +8,14 @@ namespace OpenDeploy.Client.WPF;
 
 public partial class App : Application
 {
-    public IHost AppHost { get; init; } = default!;
+    public IHost AppHost { get; init; }
 
     public App()
     {
         InitializeComponent();
         DispatcherUnhandledException += App_DispatcherUnhandledException;
         ShutdownMode = ShutdownMode.OnMainWindowClose;
+        AppHost = Program.AppHost;
     }
 
     protected override async void OnStartup(StartupEventArgs e)

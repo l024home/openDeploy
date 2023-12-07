@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -42,6 +43,17 @@ public partial class SolutionViewModel : ObservableObject
     [ObservableProperty]
     private List<PatchEntryChanges>? changesSinceLastCommit;
 
+    /// <summary> 待发布的文件 </summary>
+    [ObservableProperty]
+    private List<DeployFileInfo>? publishFiles;
+
+    /// <summary> 是否执行全量发布 </summary>
+    [ObservableProperty]
+    private bool fullRelease;
+
+    /// <summary> Web项目视图模型 </summary>
+    private ProjectViewModel? webProject = default!;
+
 
 
 
@@ -52,62 +64,92 @@ public partial class SolutionViewModel : ObservableObject
     [RelayCommand]
     public void OpenQuickDeploySolutionDialog()
     {
-        if (!Projects.Any(a => a.IsWeb))
+        webProject = Projects.FirstOrDefault(a => a.IsWeb);
+        if (webProject == null)
         {
+            Growl.ClearGlobal();
             Growl.ErrorGlobal("暂未发现Web项目,默认规则是必须带web.config的才是Web项目");
             return;
         }
-
-        var solutionRepo = ((App)Application.Current).AppHost.Services.GetRequiredService<SolutionRepository>();
-        var lastCommit = solutionRepo.GetLastCommit(Id);
-        if (lastCommit != null)
+        if (string.IsNullOrEmpty(webProject.ReleaseDir))
         {
-            LastPublishTime = lastCommit.PublishTime.ToString("yyyy-MM-dd HH:mm:ss");
-        }
-        else
-        {
-            LastPublishTime = "暂无发布记录";
-        }
-
-        //获取自上次发布以来的改动
-        var changes = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastCommit?.GitCommitId);
-        if (changes == null || changes.Count == 0)
-        {
-            Growl.WarningGlobal("暂无提交记录");
+            Growl.ClearGlobal();
+            Growl.ErrorGlobal("请配置Web项目的发布目录");
             return;
         }
 
-        GetDeployFileInfos(changes.Select(a => Path.Combine(GitRepositoryPath, a.Path.Replace("/", "\\"))));
-        ChangesSinceLastCommit = changes;
+        //获取上次发布记录
+        var solutionRepo = Program.AppHost.Services.GetRequiredService<SolutionRepository>();
+        var lastPublishCommit = solutionRepo.GetLastPublishCommit(Id);
+        LastPublishTime = lastPublishCommit != null ? lastPublishCommit.PublishTime.ToString("yyyy-MM-dd HH:mm:ss") : "暂无发布记录";
+
+        //没有发布过,本次将执行全量发布
+        if (lastPublishCommit == null)
+        {
+            FullRelease = true;
+        }
+        else
+        {
+            //获取自上次发布以来的改动
+            var changes = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastPublishCommit?.GitCommitId);
+            if (changes.IsEmpty())
+            {
+                Growl.WarningGlobal("暂无提交记录");
+                return;
+            }
+            ChangesSinceLastCommit = changes;
+
+            //解析出需要发布的文件
+            var files = GetPublishFiles(changes.Select(a => Path.Combine(GitRepositoryPath, a.Path.Replace("/", "\\"))));
+            PublishFiles = files;
+        }
+
         quickDeployDialog = Dialog.Show(new QuickDeployDialog(this));
     }
 
 
-    /// <summary>
-    /// Git修改记录 => 待发布文件集合
-    /// </summary>
-    private void GetDeployFileInfos(IEnumerable<string> changedFilePaths)
+
+    /// <summary> 确定发布 </summary>
+    [RelayCommand]
+    private void OkPublishSolution()
     {
-        var fileInfos = new List<DeployFileInfo>();
+        var releaseDir = webProject!.ReleaseDir;
+
+        if (FullRelease)
+        {
+            Growl.InfoGlobal($"全量发布: {releaseDir}");
+
+            var zipPath = Path.Combine(Environment.CurrentDirectory, $"{Guid.NewGuid()}.zip");
+
+            ZipFile.CreateFromDirectory(releaseDir, zipPath);
+
+            ShellUtil.ExplorerFile(zipPath);
+
+            return;
+        }
+
+    }
+
+
+    /// <summary>
+    /// 从Git修改记录提取出待发布文件
+    /// </summary>
+    private List<DeployFileInfo> GetPublishFiles(IEnumerable<string> changedFilePaths)
+    {
+        var fileInfos = new List<DeployFileInfo>(changedFilePaths.Count());
         foreach (string changedPath in changedFilePaths)
         {
             var fi = DeployFileInfo.Create(changedPath);
             if (fi.IsUnKnown) continue;
             fileInfos.Add(fi);
         }
-
         foreach (var fi in fileInfos)
         {
             //所属项目
             var project = Projects
                 .Where(a => fi.ChangedFilePath.Contains(a.ProjectName, StringComparison.OrdinalIgnoreCase))
                 .FirstOrDefault();
-
-            if (project == null)
-            {
-                continue;
-            }
-
+            if (project == null) continue;
             fi.ProjectName = project.ProjectName;
             if (fi.IsDLL)
             {
@@ -116,19 +158,12 @@ public partial class SolutionViewModel : ObservableObject
             }
             else
             {
-                fi.RelativeFilePath = fi.ChangedFilePath.Replace(project.ProjectDir, "");
-                fi.RelativeFilePath = fi.RelativeFilePath.TrimStart(Path.DirectorySeparatorChar);
+                fi.RelativeFilePath = fi.ChangedFilePath.Replace(project.ProjectDir, "").TrimStart(Path.DirectorySeparatorChar);
             }
             fi.AbsoluteFilePath = Path.Combine(project.ReleaseDir, fi.RelativeFilePath);
-
-
-
-            //Logger.Info(project.ToJsonString(true));
-            Logger.Info(fi.ToJsonString(true));
-            Logger.Info("");
-            //break;
         }
-        //return deployFileInfos.Distinct(new DeployFileInfoComparer()).ToList();
+        //按照 AbsoluteFilePath 去重
+        return fileInfos.Distinct(new DeployFileInfoComparer()).ToList();
     }
 
     #region Git相关命令

@@ -11,6 +11,7 @@ namespace OpenDeploy.Client;
 class Program
 {
     private static SplashScreen? _splashScreen;
+    public static IHost AppHost {  get; private set; } = default!;
 
     /// <summary> 应用程序的主入口点。 </summary>
     [STAThread]
@@ -28,10 +29,10 @@ class Program
         builder.Services.AddTransient<SolutionViewModel>();
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddTransient<MainWindow>();
-        var host = builder.Build();
+        AppHost = builder.Build();
 
         //启动应用程序
-        var app = new App() { AppHost = host };
+        var app = new App();
         app.Run();
     }
 

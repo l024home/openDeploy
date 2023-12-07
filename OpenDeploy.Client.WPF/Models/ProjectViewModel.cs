@@ -39,7 +39,7 @@ public partial class ProjectViewModel : ObservableObject
 
 
     /// <summary>
-    /// 打开项目所在的文件夹
+    /// 打开项目目录
     /// </summary>
     [RelayCommand]
     private void OpenProjectDir()
@@ -50,7 +50,29 @@ public partial class ProjectViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Growl.ErrorGlobal($"打开项目所在的文件夹失败,可能被杀毒软件阻止了: {ex}");
+            Growl.ErrorGlobal($"打开项目目录失败,可能被杀毒软件阻止了: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 打开项目发布目录
+    /// </summary>
+    [RelayCommand]
+    private void OpenProjectReleaseDir()
+    {
+        if (string.IsNullOrEmpty(ReleaseDir))
+        {
+            Growl.ClearGlobal();
+            Growl.WarningGlobal("请配置项目发布目录");
+            return;
+        }
+        try
+        {
+            Helper.ShellUtil.ExplorerFile(ReleaseDir);
+        }
+        catch (Exception ex)
+        {
+            Growl.ErrorGlobal($"打开项目发布目录失败,可能被杀毒软件阻止了: {ex}");
         }
     }
 
@@ -79,7 +101,7 @@ public partial class ProjectViewModel : ObservableObject
             return;
         }
 
-        var solutionRepo = ((App)Application.Current).AppHost.Services.GetRequiredService<SolutionRepository>();
+        var solutionRepo = Program.AppHost.Services.GetRequiredService<SolutionRepository>();
         await solutionRepo.UpdateProjectReleaseDir(Id, ReleaseDir);
 
         setProjectReleaseDirDialog?.Close();

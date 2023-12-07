@@ -127,14 +127,6 @@ public class DeployFileInfoComparer : IEqualityComparer<DeployFileInfo>
 
     public int GetHashCode(DeployFileInfo obj)
     {
-        if (obj is null)
-        {
-            return 0;
-        }
-        if (string.IsNullOrEmpty(obj.AbsoluteFilePath))
-        {
-            return 0;
-        }
-        return obj.AbsoluteFilePath.GetHashCode();
+        return 0;
     }
 }

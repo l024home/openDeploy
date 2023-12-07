@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:OpenDeploy.Client.Models"
     Width="800"
-    Height="600"
+    MaxHeight="680"
     d:DataContext="{d:DesignInstance Type=models:SolutionViewModel}"
     hc:Dialog.Token="DialogContainer"
     Background="White"
@@ -28,71 +28,93 @@
                 Margin="35"
                 VerticalScrollBarVisibility="Visible">
 
-                <hc:UniformSpacingPanel
-                    hc:InfoElement.TitlePlacement="Left"
-                    hc:TitleElement.TitleWidth="140"
-                    ChildWrapping="Wrap"
-                    Spacing="12">
 
-                    <TextBox
-                        Width="600"
-                        hc:InfoElement.Title="上次发布时间："
-                        FontSize="16"
-                        IsEnabled="False"
-                        Style="{StaticResource TextBoxExtend}"
-                        Text="{Binding LastPublishTime}" />
+                <StackPanel hc:InfoElement.TitlePlacement="Left" hc:TitleElement.TitleWidth="140">
 
-                    <TextBox
-                        Width="600"
-                        hc:InfoElement.Title="有变化的文件："
-                        FontSize="16"
-                        IsEnabled="False"
-                        Style="{StaticResource TextBoxExtend}"
-                        Text="{Binding ChangesSinceLastCommit.Count, Mode=OneWay}" />
+                    <hc:UniformSpacingPanel
+                        ChildWrapping="Wrap"
+                        Spacing="12"
+                        Visibility="{Binding FullRelease, Converter={StaticResource BoolToVisibilityConverter}}">
 
-                    <ListView
-                        Width="700"
-                        Height="200"
-                        ItemsSource="{Binding ChangesSinceLastCommit}"
-                        Style="{StaticResource ListView.Small}"
-                        Visibility="{Binding ChangesSinceLastCommit.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn
-                                    Width="100"
-                                    DisplayMemberBinding="{Binding Status}"
-                                    Header="状态" />
-                                <GridViewColumn DisplayMemberBinding="{Binding Path}" Header="文件" />
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                        <TextBox
+                            Width="600"
+                            HorizontalAlignment="Left"
+                            hc:InfoElement.Title="上次发布时间："
+                            FontSize="16"
+                            IsEnabled="False"
+                            Style="{StaticResource TextBoxExtend}"
+                            Text="{Binding LastPublishTime}" />
 
-                    <TextBox
-                        Width="600"
-                        hc:InfoElement.Title="待发布的文件："
-                        FontSize="16"
-                        IsEnabled="False"
-                        Style="{StaticResource TextBoxExtend}"
-                        Text="" />
+                        <Border
+                            Width="460"
+                            Margin="140,0,0,0"
+                            Style="{StaticResource BorderTipDanger}">
+                            <TextBlock
+                                FontSize="16"
+                                Text="未检测到发布记录,本次将执行全量发布"
+                                TextAlignment="Left" />
+                        </Border>
 
-                    <ListView
-                        Width="700"
-                        Height="200"
-                        ItemsSource="{Binding ChangesSinceLastCommit}"
-                        Style="{StaticResource ListView.Small}"
-                        Visibility="{Binding ChangesSinceLastCommit.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn
-                                    Width="100"
-                                    DisplayMemberBinding="{Binding Status}"
-                                    Header="状态" />
-                                <GridViewColumn DisplayMemberBinding="{Binding Path}" Header="文件" />
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                    </hc:UniformSpacingPanel>
 
-                </hc:UniformSpacingPanel>
+                    <hc:UniformSpacingPanel
+                        ChildWrapping="Wrap"
+                        Spacing="12"
+                        Visibility="{Binding FullRelease, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=reverse}">
+
+                        <TextBox
+                            Width="600"
+                            hc:InfoElement.Title="有变化的文件："
+                            FontSize="16"
+                            IsEnabled="False"
+                            Style="{StaticResource TextBoxExtend}"
+                            Text="{Binding ChangesSinceLastCommit.Count, Mode=OneWay}" />
+
+                        <ListView
+                            Width="700"
+                            Height="200"
+                            ItemsSource="{Binding ChangesSinceLastCommit}"
+                            Style="{StaticResource ListView.Small}"
+                            Visibility="{Binding ChangesSinceLastCommit.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn
+                                        Width="80"
+                                        DisplayMemberBinding="{Binding Status}"
+                                        Header="状态" />
+                                    <GridViewColumn
+                                        Width="620"
+                                        DisplayMemberBinding="{Binding Path}"
+                                        Header="文件" />
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+
+                        <TextBox
+                            Width="600"
+                            hc:InfoElement.Title="待发布的文件："
+                            FontSize="16"
+                            IsEnabled="False"
+                            Style="{StaticResource TextBoxExtend}"
+                            Text="" />
+
+                        <ListView
+                            Width="700"
+                            Height="200"
+                            ItemsSource="{Binding PublishFiles}"
+                            Style="{StaticResource ListView.Small}"
+                            Visibility="{Binding PublishFiles.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn DisplayMemberBinding="{Binding RelativeFilePath}" Header="文件" />
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+
+                    </hc:UniformSpacingPanel>
+                </StackPanel>
+
+
 
             </ScrollViewer>
 
@@ -112,7 +134,7 @@
                 <Button
                     Width="120"
                     Margin="0,0,0,0"
-                    Command="{Binding OkConfigSolutionCommand}"
+                    Command="{Binding OkPublishSolutionCommand}"
                     Content="确定"
                     Style="{StaticResource ButtonPrimary}" />
             </StackPanel>

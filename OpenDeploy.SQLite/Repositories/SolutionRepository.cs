@@ -39,8 +39,8 @@ public class SolutionRepository(OpenDeployDbContext context)
         await context.SaveChangesAsync();
     }
 
-    /// <summary> 获取上次的提交记录 </summary>
-    public PublishRecord? GetLastCommit(int solutionId)
+    /// <summary> 获取上次发布对应的提交记录 </summary>
+    public PublishRecord? GetLastPublishCommit(int solutionId)
     {
         return context.PublishRecords.Where(a => a.SolutionId == solutionId).OrderByDescending(a => a.PublishTime).FirstOrDefault();
     }
