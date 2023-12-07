@@ -17,7 +17,7 @@
     WindowState="Normal"
     WindowStyle="None"
     mc:Ignorable="d">
-    <Grid Background="{x:Null}">
+    <Grid x:Name="grid" Background="{x:Null}">
         <Grid
             x:Name="LoadingMask"
             Background="Black"

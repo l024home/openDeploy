@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media;
 
 namespace OpenDeploy.Client.Windows;
 
@@ -9,9 +10,15 @@ public partial class LoadingWindow : Window
     /// </summary>
     private readonly int closeTimeout = 0;
 
-    public LoadingWindow(Window owner , int closeTimeout = 1000)
+    public LoadingWindow(Window owner , int closeTimeout = 1000, bool tranparent = true)
     {
         InitializeComponent();
+
+        if (!tranparent)
+        {
+            grid.Background = Brushes.White;
+        }
+
         Owner = owner;
         Width = owner.ActualWidth;
         Height = owner.ActualHeight;

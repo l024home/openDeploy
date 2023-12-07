@@ -29,13 +29,13 @@
             </StackPanel>
         </ScrollViewer>
 
-
+        <!--  首屏渲染Loading占位符  -->
         <Grid x:Name="LoadingPlaceHolder" Background="WhiteSmoke">
-            <controls:RingLoading
-                Width="200"
-                Height="200"
-                IsStart="true"
-                ProgressValue="10" />
+            <hc:LoadingCircle
+                Width="100"
+                Height="100"
+                DotDiameter="12"
+                Foreground="YellowGreen" />
         </Grid>
 
     </Grid>
