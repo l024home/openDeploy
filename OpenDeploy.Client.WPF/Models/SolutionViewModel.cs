@@ -34,35 +34,19 @@ public partial class SolutionViewModel : ObservableObject
     [ObservableProperty]
     private string lastPublishTime = string.Empty;
 
-
-    /// <summary> 是否没有改动 </summary>
+    /// <summary> 项目列表 </summary>
     [ObservableProperty]
-    private Visibility noChanged = Visibility.Hidden;
+    private List<ProjectViewModel> projects = [];
+
+    ///// <summary> 是否没有改动 </summary>
+    //[ObservableProperty]
+    //private Visibility noChanged = Visibility.Hidden;
 
     /// <summary> 自上次发布以来的改动 </summary>
     [ObservableProperty]
     private List<PatchEntryChanges>? changesSinceLastCommit;
 
 
-
-    /// <summary> 清空模型 </summary>
-    public void Clear()
-    {
-        Id = 0;
-        SolutionName = string.Empty;
-        GitRepositoryPath = string.Empty;
-    }
-
-    /// <summary> 映射到领域模式(用于持久化到数据库) </summary>
-    public Solution Map2Entity()
-    {
-        var solution = new Solution()
-        {
-            SolutionName = SolutionName,
-            GitRepositoryPath = GitRepositoryPath
-        };
-        return solution;
-    }
 
 
     /// <summary> 一键发布解决方案弹窗 </summary>

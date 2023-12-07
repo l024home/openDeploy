@@ -33,12 +33,19 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
     /// <summary> 加载解决方案 </summary>
     private void LoadSolutions()
     {
-        var solutionEntities = solutionRepository.GetSolutions();
-        var solutionViewModels = solutionEntities.Select(a => new SolutionViewModel
+        var solutions = solutionRepository.GetSolutions();
+        var solutionViewModels = solutions.Select(a => new SolutionViewModel
         {
             Id = a.Id,
             GitRepositoryPath = a.GitRepositoryPath,
             SolutionName = a.SolutionName,
+            Projects = a.Projects.Select(p => new ProjectViewModel
+            {
+                IsWeb = p.IsWeb,
+                ProjectDir = p.ProjectDir,
+                ProjectName = p.ProjectName,
+                ReleaseDir = p.ReleaseDir,
+            }).ToList()
         });
         Solutions = new ObservableCollection<SolutionViewModel>(solutionViewModels);
     }

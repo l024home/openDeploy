@@ -7,11 +7,9 @@
     xmlns:uc="clr-namespace:OpenDeploy.Client.Controls">
 
     <converters:DataCountToVisibilityConverter x:Key="DataCountToVisibilityConverter" />
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
-    <Style
-        x:Key="Path4GeometryItem"
-        BasedOn="{StaticResource {x:Type Path}}"
-        TargetType="Path">
+    <Style x:Key="Path4GeometryItem" TargetType="Path">
         <Setter Property="Margin" Value="10" />
         <Setter Property="Width" Value="20" />
         <Setter Property="Height" Value="20" />
@@ -140,37 +138,27 @@
         <Setter Property="ItemTemplate" Value="{DynamicResource SolutionItemTemplate}" />
     </Style>
 
-
-    <GridView
-        x:Key="SolutionItemGridView"
-        AllowsColumnReorder="False"
-        ColumnHeaderContainerStyle="{StaticResource myHeaderStyle}"
-        ColumnHeaderTemplate="{StaticResource myHeaderTemplate}">
+    <!--  项目列表 样式重写  -->
+    <GridView x:Key="SolutionItemGridView">
 
         <GridViewColumn
-            Width="50"
-            DisplayMemberBinding="{Binding ProjectIndex}"
-            Header="编号" />
-        <GridViewColumn
-            Width="120"
+            Width="200"
             DisplayMemberBinding="{Binding ProjectName}"
             Header="项目名称" />
         <GridViewColumn
-            Width="80"
-            DisplayMemberBinding="{Binding SolutionName}"
-            Header="解决方案" />
-        <GridViewColumn
-            Width="450"
-            DisplayMemberBinding="{Binding ProjectPath}"
+            Width="500"
+            DisplayMemberBinding="{Binding ProjectDir}"
             Header="项目路径" />
-        <GridViewColumn Width="60" Header="状态">
+        <GridViewColumn Width="100" Header="Web？">
             <GridViewColumn.CellTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <Path
-                            Data="{Binding ProjectStatus.Data}"
-                            Fill="{Binding ProjectStatus.Fill}"
-                            Style="{StaticResource Path4GeometryItem}" />
+                            Data="{StaticResource SuccessGeometry}"
+                            Fill="{StaticResource SuccessBrush}"
+                            Stretch="Uniform"
+                            Style="{StaticResource Path4GeometryItem}"
+                            Visibility="{Binding IsWeb, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </StackPanel>
                 </DataTemplate>
             </GridViewColumn.CellTemplate>
@@ -181,7 +169,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Button
                             Margin="0,0,15,0"
-                            Command="{Binding OpenProjectFolderCommand}"
+                            Command="{Binding OpenProjectDirCommand}"
                             Content="打开" />
                         <Button
                             Margin="0,0,15,0"
@@ -316,6 +304,23 @@
                                     <RowDefinition />
                                     <RowDefinition Height="200" />
                                 </Grid.RowDefinitions>
+
+                                <!--  项目列表  -->
+                                <ListView
+                                    Grid.Row="0"
+                                    ItemsSource="{Binding Projects}"
+                                    View="{StaticResource SolutionItemGridView}">
+                                    <ListView.Resources>
+                                        <SolidColorBrush
+                                            x:Key="PrimaryBrush"
+                                            o:Freeze="True"
+                                            Color="{DynamicResource DarkDefaultColor}" />
+                                        <SolidColorBrush
+                                            x:Key="TextIconBrush"
+                                            o:Freeze="True"
+                                            Color="{DynamicResource PrimaryTextColor}" />
+                                    </ListView.Resources>
+                                </ListView>
 
                                 <!--  日志输出  -->
                                 <Grid Grid.Row="1">
