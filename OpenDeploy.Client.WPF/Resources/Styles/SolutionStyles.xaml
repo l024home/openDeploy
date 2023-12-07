@@ -170,7 +170,12 @@
                         <Button
                             Margin="0,0,15,0"
                             Command="{Binding OpenProjectDirCommand}"
-                            Content="打开所在文件夹" />
+                            Content="打开项目所在文件夹" />
+                        <Button
+                            Margin="0,0,15,0"
+                            Command="{Binding OpenSetProjectReleaseDirDialogCommand}"
+                            Content="设置项目发布路径"
+                            Visibility="{Binding IsWeb, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <!--<Button
                             Margin="0,0,15,0"
                             Command="{Binding OpenEditProjectDialogCommand}"

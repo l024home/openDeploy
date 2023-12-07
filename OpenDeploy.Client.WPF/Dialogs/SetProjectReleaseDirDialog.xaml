@@ -1,0 +1,70 @@
+﻿<Border
+    x:Class="OpenDeploy.Client.Dialogs.SetProjectReleaseDirDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:OpenDeploy.Client.Models"
+    xmlns:o="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+    Width="600"
+    Height="200"
+    d:DataContext="{d:DesignInstance Type=models:ProjectViewModel}"
+    hc:Dialog.Token="DialogContainer"
+    Background="White"
+    CornerRadius="10"
+    mc:Ignorable="d">
+    <Border.Resources>
+        <Color x:Key="RegionColor">#ffffff</Color>
+        <SolidColorBrush
+            x:Key="RegionBrush"
+            o:Freeze="True"
+            Color="{DynamicResource RegionColor}" />
+    </Border.Resources>
+
+    <hc:DialogContainer>
+        <hc:SimplePanel>
+
+            <StackPanel Margin="25">
+                <TextBox
+                    Margin="0,25,0,0"
+                    hc:InfoElement.Title="设置项目发布路径"
+                    Style="{StaticResource TextBoxExtend}"
+                    Text="{Binding ReleaseDir}" />
+            </StackPanel>
+
+            <!--  确定,取消  -->
+            <StackPanel
+                Margin="0,0,0,15"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Orientation="Horizontal">
+                <Button
+                    Width="120"
+                    Margin="0,0,32,0"
+                    Command="hc:ControlCommands.Close"
+                    Content="取消"
+                    Style="{StaticResource ButtonInfo}" />
+                <Button
+                    Width="120"
+                    Command="{Binding OkSetProjectReleaseDirCommand}"
+                    Content="确定"
+                    Style="{StaticResource ButtonPrimary}" />
+            </StackPanel>
+
+            <!--  右上角关闭按钮  -->
+            <Button
+                Width="22"
+                Height="22"
+                Margin="0,4,4,0"
+                Padding="0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                hc:IconElement.Geometry="{StaticResource ErrorGeometry}"
+                Command="hc:ControlCommands.Close"
+                Foreground="{DynamicResource PrimaryBrush}"
+                Style="{StaticResource ButtonIcon}"
+                ToolTip="关闭" />
+        </hc:SimplePanel>
+    </hc:DialogContainer>
+</Border>

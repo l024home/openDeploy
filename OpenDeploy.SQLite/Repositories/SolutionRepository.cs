@@ -27,6 +27,18 @@ public class SolutionRepository(OpenDeployDbContext context)
         return await context.Solutions.Include(a => a.Projects).ToListAsync();
     }
 
+    /// <summary> 更新项目的发布目录 </summary>
+    public async Task UpdateProjectReleaseDir(int projectId, string dir)
+    {
+        var project = await context.Projects.FirstOrDefaultAsync(a => a.Id == projectId);
+        if (project == null)
+        {
+            throw new Exception("为找到相关的项目信息");
+        }
+        project.ReleaseDir = dir;
+        await context.SaveChangesAsync();
+    }
+
     /// <summary> 获取上次的提交记录 </summary>
     public PublishRecord? GetLastCommit(int solutionId)
     {

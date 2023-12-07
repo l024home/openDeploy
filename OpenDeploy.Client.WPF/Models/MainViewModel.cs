@@ -46,6 +46,7 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
             SolutionName = a.SolutionName,
             Projects = a.Projects.Select(p => new ProjectViewModel
             {
+                Id = p.Id,
                 IsWeb = p.IsWeb,
                 ProjectDir = p.ProjectDir,
                 ProjectName = p.ProjectName,
@@ -88,13 +89,13 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
         //发现解决方案
         var solution = DetectSolution(SolutionGitPath);
 
-        //持久化到Sqlite
+        //持久化到数据库
         await solutionRepository.AddSolutionAsync(solution);
-
-        Growl.SuccessGlobal("操作成功");
 
         //重新加载解决方案
         await GetSolutionViewModelAsync();
+
+        Growl.SuccessGlobal("操作成功");
 
         //关闭弹窗
         configSolutionDialog?.Close();

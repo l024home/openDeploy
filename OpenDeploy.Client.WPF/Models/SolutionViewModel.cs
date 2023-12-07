@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -37,10 +38,6 @@ public partial class SolutionViewModel : ObservableObject
     [ObservableProperty]
     private List<ProjectViewModel> projects = [];
 
-    ///// <summary> 是否没有改动 </summary>
-    //[ObservableProperty]
-    //private Visibility noChanged = Visibility.Hidden;
-
     /// <summary> 自上次发布以来的改动 </summary>
     [ObservableProperty]
     private List<PatchEntryChanges>? changesSinceLastCommit;
@@ -72,18 +69,16 @@ public partial class SolutionViewModel : ObservableObject
             LastPublishTime = "暂无发布记录";
         }
 
-        //获取自上次提交以来的改动
-        var diff = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastCommit?.GitCommitId);
-        if (diff == null || diff.Count == 0)
+        //获取自上次发布以来的改动
+        var changes = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastCommit?.GitCommitId);
+        if (changes == null || changes.Count == 0)
         {
             Growl.WarningGlobal("暂无提交记录");
             return;
         }
 
-        ChangesSinceLastCommit = diff;
-
-        GetDeployFileInfos(diff.Select(a => a.Path));
-
+        GetDeployFileInfos(changes.Select(a => Path.Combine(GitRepositoryPath, a.Path.Replace("/", "\\"))));
+        ChangesSinceLastCommit = changes;
         quickDeployDialog = Dialog.Show(new QuickDeployDialog(this));
     }
 
@@ -114,9 +109,24 @@ public partial class SolutionViewModel : ObservableObject
             }
 
             fi.ProjectName = project.ProjectName;
-            fi.FileName = $"{project.ProjectName}.dll";
+            if (fi.IsDLL)
+            {
+                fi.FileName = $"{project.ProjectName}.dll";
+                fi.RelativeFilePath = $"bin\\{fi.FileName}";
+            }
+            else
+            {
+                fi.RelativeFilePath = fi.ChangedFilePath.Replace(project.ProjectDir, "");
+                fi.RelativeFilePath = fi.RelativeFilePath.TrimStart(Path.DirectorySeparatorChar);
+            }
+            fi.AbsoluteFilePath = Path.Combine(project.ReleaseDir, fi.RelativeFilePath);
 
+
+
+            //Logger.Info(project.ToJsonString(true));
             Logger.Info(fi.ToJsonString(true));
+            Logger.Info("");
+            //break;
         }
         //return deployFileInfos.Distinct(new DeployFileInfoComparer()).ToList();
     }
