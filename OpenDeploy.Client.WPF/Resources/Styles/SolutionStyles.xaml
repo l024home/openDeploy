@@ -170,7 +170,7 @@
                         <Button
                             Margin="0,0,15,0"
                             Command="{Binding OpenProjectDirCommand}"
-                            Content="定位" />
+                            Content="打开所在文件夹" />
                         <!--<Button
                             Margin="0,0,15,0"
                             Command="{Binding OpenEditProjectDialogCommand}"

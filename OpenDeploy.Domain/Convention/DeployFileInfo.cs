@@ -58,7 +58,6 @@ public class DeployFileInfo
         if (fileType == DeployFileType.CS)
         {
             fileInfo.IsDLL = true;
-            fileInfo.FileName = fileInfo.GetDLLName();
         }
         else if (fileType == DeployFileType.UnKnown)
         {
@@ -69,11 +68,6 @@ public class DeployFileInfo
             fileInfo.FileName = Path.GetFileName(changedFilePath);
         }
         return fileInfo;
-    }
-
-    private string GetDLLName()
-    {
-        return string.Format("{0}.dll", SplitedFilePath[1]);
     }
 
     public static DeployFileInfo Create(string projectName, string projectDLLPath, string dllName)

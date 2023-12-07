@@ -4,26 +4,26 @@ using OpenDeploy.Domain.Models;
 namespace OpenDeploy.SQLite;
 
 /// <summary> 解决方案仓储 </summary>
-public class SolutionRepository
+public class SolutionRepository(OpenDeployDbContext context)
 {
-    private readonly OpenDeployDbContext context;
+    private readonly OpenDeployDbContext context = context;
 
-    public SolutionRepository(OpenDeployDbContext context)
+    /// <summary> 初始化数据库 </summary>
+    public async Task InitAsync()
     {
-        this.context = context;
+        await context.Database.EnsureCreatedAsync();
     }
 
     /// <summary> 添加解决方案 </summary>
-    public void AddSolution(Solution solution)
+    public async Task AddSolutionAsync(Solution solution)
     {
-        context.Solutions.Add(solution);
-        context.SaveChanges();
+        await context.Solutions.AddAsync(solution);
+        await context.SaveChangesAsync();
     }
 
     /// <summary> 获取所有的解决方案 </summary>
     public async Task<List<Solution>> GetSolutionAsync()
     {
-        await context.Database.EnsureCreatedAsync();
         return await context.Solutions.Include(a => a.Projects).ToListAsync();
     }
 

@@ -7,11 +7,10 @@ using LibGit2Sharp;
 using Microsoft.Extensions.DependencyInjection;
 using OpenDeploy.Client.Dialogs;
 using OpenDeploy.Client.Helper;
-using OpenDeploy.Client.Windows;
 using OpenDeploy.Client.WPF;
 using OpenDeploy.Domain.Convention;
-using OpenDeploy.Domain.Models;
 using OpenDeploy.Infrastructure;
+using OpenDeploy.Infrastructure.Extensions;
 using OpenDeploy.SQLite;
 
 namespace OpenDeploy.Client.Models;
@@ -56,6 +55,12 @@ public partial class SolutionViewModel : ObservableObject
     [RelayCommand]
     public void OpenQuickDeploySolutionDialog()
     {
+        if (!Projects.Any(a => a.IsWeb))
+        {
+            Growl.ErrorGlobal("暂未发现Web项目,默认规则是必须带web.config的才是Web项目");
+            return;
+        }
+
         var solutionRepo = ((App)Application.Current).AppHost.Services.GetRequiredService<SolutionRepository>();
         var lastCommit = solutionRepo.GetLastCommit(Id);
         if (lastCommit != null)
@@ -77,7 +82,7 @@ public partial class SolutionViewModel : ObservableObject
 
         ChangesSinceLastCommit = diff;
 
-        GetDeployFileInfos(diff.Select(a=>a.Path));
+        GetDeployFileInfos(diff.Select(a => a.Path));
 
         quickDeployDialog = Dialog.Show(new QuickDeployDialog(this));
     }
@@ -86,32 +91,32 @@ public partial class SolutionViewModel : ObservableObject
     /// <summary>
     /// Git修改记录 => 待发布文件集合
     /// </summary>
-    private static void GetDeployFileInfos(IEnumerable<string> changedFilePaths)
+    private void GetDeployFileInfos(IEnumerable<string> changedFilePaths)
     {
-        var deployFileInfos = new List<DeployFileInfo>();
+        var fileInfos = new List<DeployFileInfo>();
         foreach (string changedPath in changedFilePaths)
         {
             var fi = DeployFileInfo.Create(changedPath);
             if (fi.IsUnKnown) continue;
-            deployFileInfos.Add(fi);
+            fileInfos.Add(fi);
         }
 
-        foreach (var fi in deployFileInfos)
+        foreach (var fi in fileInfos)
         {
-            Logger.Info(fi.ToString());
+            //所属项目
+            var project = Projects
+                .Where(a => fi.ChangedFilePath.Contains(a.ProjectName, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault();
 
-            //if (fi.IsDLL)
-            //{
-            //    var dllPath = Solution.DeployProjects.Where(a => a.ProjectName == fi.ProjectName).Select(a => a.ProjectDLLPath).FirstOrDefault();
-            //    if (!string.IsNullOrEmpty(dllPath))
-            //    {
-            //        fi.AbsoluteFilePath = Path.Combine(dllPath, fi.FileName);
-            //    }
-            //}
-            //else
-            //{
-            //    fi.AbsoluteFilePath = Path.Combine(Solution.SolutionPath, fi.ChangedFilePath);
-            //}
+            if (project == null)
+            {
+                continue;
+            }
+
+            fi.ProjectName = project.ProjectName;
+            fi.FileName = $"{project.ProjectName}.dll";
+
+            Logger.Info(fi.ToJsonString(true));
         }
         //return deployFileInfos.Distinct(new DeployFileInfoComparer()).ToList();
     }
@@ -223,7 +228,7 @@ public partial class SolutionViewModel : ObservableObject
 
         LogText = output;
         loading.Close();
-    } 
+    }
 
     #endregion
 }

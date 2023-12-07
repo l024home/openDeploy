@@ -5,12 +5,24 @@ namespace OpenDeploy.Infrastructure.Extensions;
 /// <summary> Object类型扩展 </summary>
 public static class ObjectExtensions
 {
-    public static string ToJsonString(this object? obj)
+    private static readonly JsonSerializerOptions options = new()
+    {
+        WriteIndented = true,
+    };
+
+    public static string ToJsonString(this object? obj, bool indent = false)
     {
         if (obj is null)
         {
             return string.Empty;
         }
-        return JsonSerializer.Serialize(obj);
+        if (indent)
+        {
+            return JsonSerializer.Serialize(obj, options);
+        }
+        else
+        {
+            return JsonSerializer.Serialize(obj);
+        }
     }
 }

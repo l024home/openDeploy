@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenDeploy.Client.Models;
 using OpenDeploy.Client.WPF;
-using OpenDeploy.Infrastructure;
 using OpenDeploy.SQLite;
 
 namespace OpenDeploy.Client;
@@ -13,14 +12,10 @@ class Program
 {
     private static SplashScreen? _splashScreen;
 
-    /// <summary>
-    /// 应用程序的主入口点。
-    /// </summary>
+    /// <summary> 应用程序的主入口点。 </summary>
     [STAThread]
     public static void Main()
     {
-        Logger.Info("Start Main");
-
         //启动画面
         _splashScreen = new SplashScreen("/Resources/Images/OpenDeploy.png");
         _splashScreen.Show(autoClose: false, topMost: true);
@@ -33,7 +28,7 @@ class Program
         builder.Services.AddTransient<SolutionViewModel>();
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddTransient<MainWindow>();
-        IHost host = builder.Build();
+        var host = builder.Build();
 
         //启动应用程序
         var app = new App() { AppHost = host };
@@ -44,7 +39,7 @@ class Program
     {
         if (_splashScreen != null)
         {
-            _splashScreen.Close(TimeSpan.FromMilliseconds(0));
+            _splashScreen.Close(TimeSpan.FromSeconds(0));
             _splashScreen = null;
         }
     }

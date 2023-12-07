@@ -26,13 +26,17 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
     private string solutionGitPath = string.Empty;
 
     /// <summary> 初始化 </summary>
-    public Task InitAsync()
+    public async Task InitAsync()
     {
-        return Task.Run(LoadSolutionsAsync);
+        await Task.Run(async () =>
+        {
+            await solutionRepository.InitAsync();
+            await GetSolutionViewModelAsync();
+        });
     }
 
-    /// <summary> 加载解决方案 </summary>
-    private async Task LoadSolutionsAsync()
+    /// <summary> 加载解决方案视图模型 </summary>
+    private async Task GetSolutionViewModelAsync()
     {
         var solutions = await solutionRepository.GetSolutionAsync();
         var solutionViewModels = solutions.Select(a => new SolutionViewModel
@@ -65,7 +69,7 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
 
     /// <summary> 确定配置解决方案 </summary>
     [RelayCommand]
-    private void OkConfigSolution()
+    private async Task OkConfigSolution()
     {
         try
         {
@@ -81,15 +85,16 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
             return;
         }
 
+        //发现解决方案
         var solution = DetectSolution(SolutionGitPath);
 
         //持久化到Sqlite
-        solutionRepository.AddSolution(solution);
+        await solutionRepository.AddSolutionAsync(solution);
 
         Growl.SuccessGlobal("操作成功");
 
         //重新加载解决方案
-        LoadSolutionsAsync();
+        await GetSolutionViewModelAsync();
 
         //关闭弹窗
         configSolutionDialog?.Close();
