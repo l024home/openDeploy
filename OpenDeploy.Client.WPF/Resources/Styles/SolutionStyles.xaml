@@ -146,7 +146,7 @@
             DisplayMemberBinding="{Binding ProjectName}"
             Header="项目名称" />
         <GridViewColumn
-            Width="500"
+            Width="550"
             DisplayMemberBinding="{Binding ProjectDir}"
             Header="项目路径" />
         <GridViewColumn Width="100" Header="Web？">
@@ -163,19 +163,19 @@
                 </DataTemplate>
             </GridViewColumn.CellTemplate>
         </GridViewColumn>
-        <GridViewColumn Width="200" Header="操作">
+        <GridViewColumn Width="auto" Header="操作">
             <GridViewColumn.CellTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <Button
                             Margin="0,0,15,0"
                             Command="{Binding OpenProjectDirCommand}"
-                            Content="打开" />
-                        <Button
+                            Content="定位" />
+                        <!--<Button
                             Margin="0,0,15,0"
                             Command="{Binding OpenEditProjectDialogCommand}"
-                            Content="配置" />
-                        <Button Command="{Binding OpenDeployProjectDialogCommand}" Content="发布" />
+                            Content="配置" />-->
+                        <!--<Button Command="{Binding OpenDeployProjectDialogCommand}" Content="发布" />-->
                     </StackPanel>
                 </DataTemplate>
             </GridViewColumn.CellTemplate>

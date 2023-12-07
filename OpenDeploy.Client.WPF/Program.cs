@@ -11,6 +11,8 @@ namespace OpenDeploy.Client;
 
 class Program
 {
+    private static SplashScreen? _splashScreen;
+
     /// <summary>
     /// 应用程序的主入口点。
     /// </summary>
@@ -20,9 +22,8 @@ class Program
         Logger.Info("Start Main");
 
         //启动画面
-        new SplashScreen("/Resources/Images/OpenDeploy.png").Show(true, true);
-
-        Logger.Info("Before Build");
+        _splashScreen = new SplashScreen("/Resources/Images/OpenDeploy.png");
+        _splashScreen.Show(autoClose: false, topMost: true);
 
         //依赖注入
         var builder = Host.CreateApplicationBuilder();
@@ -34,12 +35,17 @@ class Program
         builder.Services.AddTransient<MainWindow>();
         IHost host = builder.Build();
 
-        Logger.Info("After Build");
-
         //启动应用程序
         var app = new App() { AppHost = host };
         app.Run();
+    }
 
-        Logger.Info("After Run");
+    public static void CloseSplashScreen()
+    {
+        if (_splashScreen != null)
+        {
+            _splashScreen.Close(TimeSpan.FromMilliseconds(0));
+            _splashScreen = null;
+        }
     }
 }

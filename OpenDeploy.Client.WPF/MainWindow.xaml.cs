@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using HandyControl.Tools.Extension;
+using OpenDeploy.Client.Helper;
 using OpenDeploy.Client.Models;
 using OpenDeploy.Infrastructure;
 
@@ -11,17 +13,18 @@ public partial class MainWindow : System.Windows.Window
     public MainWindow(MainViewModel mainViewModel)
     {
         InitializeComponent();
-
         Loaded += MainWindow_Loaded;
-
         DataContext = mainViewModel;
         this.mainViewModel = mainViewModel;
     }
 
-    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        Logger.Info("MainWindow Loaded");
-        mainViewModel.Init();
+        Program.CloseSplashScreen();
+
+        await mainViewModel.InitAsync();
+
+        LoadingPlaceHolder.Hide();
     }
 
 }

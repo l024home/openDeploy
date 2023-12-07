@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using OpenDeploy.Client.Dialogs;
+using OpenDeploy.Client.Helper;
 using OpenDeploy.Domain.Models;
 using OpenDeploy.Infrastructure;
 using OpenDeploy.SQLite;
@@ -18,22 +19,22 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
 
     /// <summary> 解决方案集合 </summary>
     [ObservableProperty]
-    private ObservableCollection<SolutionViewModel> solutions = default!;
+    private List<SolutionViewModel> solutions = default!;
 
     /// <summary> 解决方案Git路径 </summary>
     [ObservableProperty]
     private string solutionGitPath = string.Empty;
 
     /// <summary> 初始化 </summary>
-    public void Init()
+    public Task InitAsync()
     {
-        LoadSolutions();
+        return Task.Run(LoadSolutionsAsync);
     }
 
     /// <summary> 加载解决方案 </summary>
-    private void LoadSolutions()
+    private async Task LoadSolutionsAsync()
     {
-        var solutions = solutionRepository.GetSolutions();
+        var solutions = await solutionRepository.GetSolutionAsync();
         var solutionViewModels = solutions.Select(a => new SolutionViewModel
         {
             Id = a.Id,
@@ -46,8 +47,8 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
                 ProjectName = p.ProjectName,
                 ReleaseDir = p.ReleaseDir,
             }).ToList()
-        });
-        Solutions = new ObservableCollection<SolutionViewModel>(solutionViewModels);
+        }).ToList();
+        Solutions = solutionViewModels;
     }
 
 
@@ -88,7 +89,7 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
         Growl.SuccessGlobal("操作成功");
 
         //重新加载解决方案
-        LoadSolutions();
+        LoadSolutionsAsync();
 
         //关闭弹窗
         configSolutionDialog?.Close();

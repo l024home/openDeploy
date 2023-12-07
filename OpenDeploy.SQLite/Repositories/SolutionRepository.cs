@@ -11,7 +11,6 @@ public class SolutionRepository
     public SolutionRepository(OpenDeployDbContext context)
     {
         this.context = context;
-        context.Database.EnsureCreated();
     }
 
     /// <summary> 添加解决方案 </summary>
@@ -22,9 +21,10 @@ public class SolutionRepository
     }
 
     /// <summary> 获取所有的解决方案 </summary>
-    public List<Solution> GetSolutions()
+    public async Task<List<Solution>> GetSolutionAsync()
     {
-        return [.. context.Solutions.Include(a => a.Projects)];
+        await context.Database.EnsureCreatedAsync();
+        return await context.Solutions.Include(a => a.Projects).ToListAsync();
     }
 
     /// <summary> 获取上次的提交记录 </summary>

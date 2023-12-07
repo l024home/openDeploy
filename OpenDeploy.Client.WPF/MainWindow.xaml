@@ -29,5 +29,14 @@
             </StackPanel>
         </ScrollViewer>
 
+
+        <Grid x:Name="LoadingPlaceHolder" Background="WhiteSmoke">
+            <controls:RingLoading
+                Width="200"
+                Height="200"
+                IsStart="true"
+                ProgressValue="10" />
+        </Grid>
+
     </Grid>
 </Window>
