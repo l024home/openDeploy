@@ -1,10 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.IO;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using OpenDeploy.Client.Dialogs;
-using OpenDeploy.Client.Helper;
 using OpenDeploy.Domain.Models;
 using OpenDeploy.Infrastructure;
 using OpenDeploy.SQLite;
@@ -53,7 +52,11 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
                 ReleaseDir = p.ReleaseDir,
             }).ToList()
         }).ToList();
-        Solutions = solutionViewModels;
+
+        await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            Solutions = solutionViewModels;
+        });
     }
 
 

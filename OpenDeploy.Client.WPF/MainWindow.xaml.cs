@@ -20,7 +20,7 @@ public partial class MainWindow : System.Windows.Window
     {
         Program.CloseSplashScreen();
         await mainViewModel.InitAsync();
-        LoadingPlaceHolder.Visibility = Visibility.Collapsed;
+        LoadingPlaceHolder.Hide();
     }
 
 }

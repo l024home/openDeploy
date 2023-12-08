@@ -19,15 +19,17 @@
     mc:Ignorable="d">
     <Grid>
 
-        <!--  配置解决方案占位符  -->
-        <controls:NoSolutionsDisplay Visibility="{Binding Solutions.Count, Converter={StaticResource DataCountToVisibilityConverter}, ConverterParameter=reverse}" />
+        <Grid>
+            <!--  配置解决方案占位符  -->
+            <controls:NoSolutionsDisplay Visibility="{Binding Solutions.Count, Converter={StaticResource DataCountToVisibilityConverter}, ConverterParameter=reverse}" />
 
-        <!--  解决方案列表  -->
-        <ScrollViewer Visibility="{Binding Solutions.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
-            <StackPanel>
-                <ItemsControl ItemsSource="{Binding Solutions}" Style="{StaticResource SolutionItemsControlBaseStyle}" />
-            </StackPanel>
-        </ScrollViewer>
+            <!--  解决方案列表  -->
+            <ScrollViewer Visibility="{Binding Solutions.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding Solutions}" Style="{StaticResource SolutionItemsControlBaseStyle}" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
 
         <!--  首屏渲染Loading占位符  -->
         <Grid x:Name="LoadingPlaceHolder" Background="WhiteSmoke">

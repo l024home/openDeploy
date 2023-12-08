@@ -78,7 +78,14 @@ public class GitHelper
     /// </summary>
     public static bool ExistsCommit(string repoPath, string commitId)
     {
-        var commit = GetCommit(repoPath, commitId);
-        return commit != null;
+        try
+        {
+            var commit = GetCommit(repoPath, commitId);
+            return commit != null;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

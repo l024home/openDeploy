@@ -120,22 +120,14 @@ public partial class SolutionViewModel : ObservableObject
     [RelayCommand]
     private async Task OkPublishSolution()
     {
-        var loading = Loading.Show();
-        try
+        //首次发布
+        if (FirstRelease)
         {
-            //首次发布
-            if (FirstRelease)
-            {
-                await RunFirstPublishAsync();
-                return;
-            }
-            await RunPublishAsync();
+            await RunFirstPublishAsync();
+            return;
         }
-        finally
-        {
-            loading.Close();
-            quickDeployDialog?.Close();
-        }
+
+        await RunPublishAsync();
     }
 
     /// <summary>
@@ -146,18 +138,19 @@ public partial class SolutionViewModel : ObservableObject
         if (string.IsNullOrEmpty(FirstPublishGitCommitId))
         {
             Growl.ClearGlobal();
-            Growl.Warning($"请输入Git提交ID");
+            Growl.WarningGlobal($"请输入Git提交ID");
             return;
         }
         if (!GitHelper.ExistsCommit(GitRepositoryPath, FirstPublishGitCommitId))
         {
             Growl.ClearGlobal();
-            Growl.Warning($"请输入正确的Git提交ID");
+            Growl.WarningGlobal($"请输入正确的Git提交ID");
             return;
         }
         //保存首次人工发布记录
         await solutionRepo.SaveFirstPublishAsync(Id, SolutionName, FirstPublishGitCommitId);
         Growl.SuccessGlobal($"操作成功");
+        quickDeployDialog?.Close();
     }
 
     /// <summary>
@@ -181,6 +174,8 @@ public partial class SolutionViewModel : ObservableObject
                 return;
             }
         }
+
+        var loading = Loading.Show();
 
         //待发布文件打包zip
         var zipResult = await ZipHelper.CreateZipAsync(PublishFiles.Select(a => new ZipFileInfo(a.PublishFileAbsolutePath, a.PublishFileRelativePath)));
@@ -208,6 +203,7 @@ public partial class SolutionViewModel : ObservableObject
             Logger.Info("完成发送");
 
             Growl.SuccessGlobal($"发布成功");
+            quickDeployDialog?.Close();
         }
         catch (Exception ex)
         {
@@ -218,10 +214,11 @@ public partial class SolutionViewModel : ObservableObject
         {
             _ = Task.Run(async () =>
             {
-                //ShellUtil.ExplorerFile(zipPath);
-                await Task.Delay(100);
+                ShellUtil.ExplorerFile(zipResult.FullFileName);
+                await Task.Delay(1000);
                 File.Delete(zipResult.FullFileName);
             });
+            loading.Close();
         }
     }
 
