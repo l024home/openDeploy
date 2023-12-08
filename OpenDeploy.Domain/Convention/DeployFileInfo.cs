@@ -21,14 +21,19 @@ public class DeployFileInfo
     public bool IsUnKnown { get; set; }
 
 
-    /// <summary> Git 修改的本地文件路径 </summary>
-    public string ChangedFilePath { get; set; } = string.Empty;
+    /// <summary> Git更改文件相对路径 </summary>
+    public string ChangedFileRelativePath { get; set; } = string.Empty;
 
-    /// <summary> 文件相对于项目的路径 </summary>
-    public string RelativeFilePath { get; set; } = string.Empty;
+    /// <summary> Git更改文件绝对路径 </summary>
+    public string ChangedFileAbsolutePath { get; set; } = string.Empty;
 
-    /// <summary> 文件的绝对路径 </summary>
-    public string AbsoluteFilePath { get; set; } = string.Empty;
+
+    /// <summary> 待发布文件相对路径 </summary>
+    public string PublishFileRelativePath { get; set; } = string.Empty;
+
+    /// <summary> 待发布文件绝对路径 </summary>
+    public string PublishFileAbsolutePath { get; set; } = string.Empty;
+
 
     /// <summary> 是否程序集文件类型 </summary>
     public bool IsDLL { get; set; }
@@ -50,7 +55,7 @@ public class DeployFileInfo
 
         var fileInfo = new DeployFileInfo
         {
-            ChangedFilePath = changedFilePath,
+            ChangedFileRelativePath = changedFilePath,
             FileType = fileType,
             SplitedFilePath = [.. changedFilePath.Split('/', StringSplitOptions.RemoveEmptyEntries)],
         };
@@ -78,7 +83,7 @@ public class DeployFileInfo
             FileName = dllName,
             IsDLL = true,
             FileType = DeployFileType.CS,
-            AbsoluteFilePath = Path.Combine(projectDLLPath, dllName)
+            PublishFileAbsolutePath = Path.Combine(projectDLLPath, dllName)
         };
         return fi;
     }
@@ -101,10 +106,10 @@ public class DeployFileInfo
             }
         }
         string relativePath = sb.ToString();
-        fi.RelativeFilePath = relativePath;
+        fi.PublishFileRelativePath = relativePath;
         if (fi.IsDLL)
         {
-            fi.RelativeFilePath = fi.FileName;
+            fi.PublishFileRelativePath = fi.FileName;
         }
     }
 
@@ -122,7 +127,7 @@ public class DeployFileInfoComparer : IEqualityComparer<DeployFileInfo>
         {
             return false;
         }
-        return x.AbsoluteFilePath == y.AbsoluteFilePath;
+        return x.PublishFileAbsolutePath == y.PublishFileAbsolutePath;
     }
 
     public int GetHashCode(DeployFileInfo obj)

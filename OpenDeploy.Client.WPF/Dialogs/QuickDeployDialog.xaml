@@ -29,38 +29,47 @@
                 VerticalScrollBarVisibility="Visible">
 
 
+
                 <StackPanel hc:InfoElement.TitlePlacement="Left" hc:TitleElement.TitleWidth="140">
+
+                    <TextBox
+                        Width="600"
+                        Margin="0,0,0,12"
+                        HorizontalAlignment="Left"
+                        hc:InfoElement.Title="上次发布时间："
+                        FontSize="16"
+                        IsEnabled="False"
+                        Style="{StaticResource TextBoxExtend}"
+                        Text="{Binding LastPublishTime}" />
 
                     <hc:UniformSpacingPanel
                         ChildWrapping="Wrap"
                         Spacing="12"
-                        Visibility="{Binding FullRelease, Converter={StaticResource BoolToVisibilityConverter}}">
+                        Visibility="{Binding FirstRelease, Converter={StaticResource BoolToVisibilityConverter}}">
+
+
+
+                        <Border Width="600" Style="{StaticResource BorderTipDanger}">
+                            <TextBlock
+                                FontSize="16"
+                                Text="未检测到发布记录,首次请人工发布,然后保存此次发布对应的Git提交ID"
+                                TextAlignment="Left" />
+                        </Border>
 
                         <TextBox
                             Width="600"
                             HorizontalAlignment="Left"
-                            hc:InfoElement.Title="上次发布时间："
+                            hc:InfoElement.Title="保存Git提交ID："
                             FontSize="16"
-                            IsEnabled="False"
                             Style="{StaticResource TextBoxExtend}"
-                            Text="{Binding LastPublishTime}" />
-
-                        <Border
-                            Width="460"
-                            Margin="140,0,0,0"
-                            Style="{StaticResource BorderTipDanger}">
-                            <TextBlock
-                                FontSize="16"
-                                Text="未检测到发布记录,本次将执行全量发布"
-                                TextAlignment="Left" />
-                        </Border>
+                            Text="{Binding FirstPublishGitCommitId}" />
 
                     </hc:UniformSpacingPanel>
 
                     <hc:UniformSpacingPanel
                         ChildWrapping="Wrap"
                         Spacing="12"
-                        Visibility="{Binding FullRelease, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=reverse}">
+                        Visibility="{Binding FirstRelease, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=reverse}">
 
                         <TextBox
                             Width="600"
@@ -106,7 +115,7 @@
                             Visibility="{Binding PublishFiles.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
                             <ListView.View>
                                 <GridView>
-                                    <GridViewColumn DisplayMemberBinding="{Binding RelativeFilePath}" Header="文件" />
+                                    <GridViewColumn DisplayMemberBinding="{Binding PublishFileRelativePath}" Header="文件" />
                                 </GridView>
                             </ListView.View>
                         </ListView>

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Channels;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -35,6 +36,10 @@ public partial class SolutionViewModel : ObservableObject
     [ObservableProperty]
     private string lastPublishTime = string.Empty;
 
+    /// <summary> 首次发布Git提交ID </summary>
+    [ObservableProperty]
+    private string firstPublishGitCommitId = string.Empty;
+
     /// <summary> 项目列表 </summary>
     [ObservableProperty]
     private List<ProjectViewModel> projects = [];
@@ -47,22 +52,22 @@ public partial class SolutionViewModel : ObservableObject
     [ObservableProperty]
     private List<DeployFileInfo>? publishFiles;
 
-    /// <summary> 是否执行全量发布 </summary>
+    /// <summary> 是否首次发布(首次发布需要人工操作) </summary>
     [ObservableProperty]
-    private bool fullRelease;
+    private bool firstRelease;
 
     /// <summary> Web项目视图模型 </summary>
     private ProjectViewModel? webProject = default!;
 
-
-
+    /// <summary> 解决方案仓储 </summary>
+    private SolutionRepository solutionRepo => Program.AppHost.Services.GetRequiredService<SolutionRepository>();
 
     /// <summary> 一键发布解决方案弹窗 </summary>
     private Dialog? quickDeployDialog;
 
     /// <summary> 打开一键发布弹窗 </summary>
     [RelayCommand]
-    public void OpenQuickDeploySolutionDialog()
+    public async Task OpenQuickDeploySolutionDialog()
     {
         webProject = Projects.FirstOrDefault(a => a.IsWeb);
         if (webProject == null)
@@ -79,19 +84,21 @@ public partial class SolutionViewModel : ObservableObject
         }
 
         //获取上次发布记录
-        var solutionRepo = Program.AppHost.Services.GetRequiredService<SolutionRepository>();
-        var lastPublishCommit = solutionRepo.GetLastPublishCommit(Id);
-        LastPublishTime = lastPublishCommit != null ? lastPublishCommit.PublishTime.ToString("yyyy-MM-dd HH:mm:ss") : "暂无发布记录";
+        var lastPublish = await solutionRepo.GetLastPublishAsync(Id);
 
-        //没有发布过,本次将执行全量发布
-        if (lastPublishCommit == null)
+        //没有发布过,本次将执行首次发布
+        if (lastPublish == null)
         {
-            FullRelease = true;
+            FirstRelease = true;
+            LastPublishTime = "暂无发布记录";
         }
         else
         {
+            FirstRelease = false;
+            LastPublishTime = lastPublish.PublishTime.ToString("yyyy-MM-dd HH:mm:ss");
+
             //获取自上次发布以来的改动
-            var changes = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastPublishCommit?.GitCommitId);
+            var changes = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastPublish?.GitCommitId);
             if (changes.IsEmpty())
             {
                 Growl.WarningGlobal("暂无提交记录");
@@ -99,8 +106,8 @@ public partial class SolutionViewModel : ObservableObject
             }
             ChangesSinceLastCommit = changes;
 
-            //解析出需要发布的文件
-            var files = GetPublishFiles(changes.Select(a => Path.Combine(GitRepositoryPath, a.Path.Replace("/", "\\"))));
+            //从Git变化解析出待发布的文件
+            var files = GetPublishFiles(changes.Select(a => a.Path.Replace("/", "\\")));
             PublishFiles = files;
         }
 
@@ -111,19 +118,38 @@ public partial class SolutionViewModel : ObservableObject
 
     /// <summary> 确定发布 </summary>
     [RelayCommand]
-    private void OkPublishSolution()
+    private async Task OkPublishSolution()
     {
         var releaseDir = webProject!.ReleaseDir;
 
-        if (FullRelease)
+        if (FirstRelease)
         {
-            Growl.InfoGlobal($"全量发布: {releaseDir}");
+            if (string.IsNullOrEmpty(FirstPublishGitCommitId))
+            {
+                Growl.ClearGlobal();
+                Growl.Warning($"请输入Git提交ID");
+                return;
+            }
 
-            var zipPath = Path.Combine(Environment.CurrentDirectory, $"{Guid.NewGuid()}.zip");
+            if (!GitHelper.ExistsCommit(GitRepositoryPath, FirstPublishGitCommitId))
+            {
+                Growl.ClearGlobal();
+                Growl.Warning($"请输入正确的Git提交ID");
+                return;
+            }
 
-            ZipFile.CreateFromDirectory(releaseDir, zipPath);
+            //保存首次人工发布记录
+            await solutionRepo.SaveFirstPublishAsync(Id, SolutionName, FirstPublishGitCommitId);
 
-            ShellUtil.ExplorerFile(zipPath);
+            Growl.SuccessGlobal($"操作成功");
+
+            //var zipPath = Path.Combine(Environment.CurrentDirectory, $"{Guid.NewGuid()}.zip");
+
+            //ZipFile.CreateFromDirectory(releaseDir, zipPath);
+
+            //ShellUtil.ExplorerFile(zipPath);
+
+            quickDeployDialog?.Close();
 
             return;
         }
@@ -145,24 +171,29 @@ public partial class SolutionViewModel : ObservableObject
         }
         foreach (var fi in fileInfos)
         {
+            fi.ChangedFileAbsolutePath = Path.Combine(GitRepositoryPath, fi.ChangedFileRelativePath);
+
             //所属项目
             var project = Projects
-                .Where(a => fi.ChangedFilePath.Contains(a.ProjectName, StringComparison.OrdinalIgnoreCase))
+                .Where(a => fi.ChangedFileRelativePath.Contains(a.ProjectName, StringComparison.OrdinalIgnoreCase))
                 .FirstOrDefault();
             if (project == null) continue;
+
             fi.ProjectName = project.ProjectName;
             if (fi.IsDLL)
             {
                 fi.FileName = $"{project.ProjectName}.dll";
-                fi.RelativeFilePath = $"bin\\{fi.FileName}";
+                fi.PublishFileRelativePath = $"bin\\{fi.FileName}";
             }
             else
             {
-                fi.RelativeFilePath = fi.ChangedFilePath.Replace(project.ProjectDir, "").TrimStart(Path.DirectorySeparatorChar);
+                fi.PublishFileRelativePath = fi.ChangedFileAbsolutePath.Replace(project.ProjectDir, "").TrimStart(Path.DirectorySeparatorChar);
             }
-            fi.AbsoluteFilePath = Path.Combine(project.ReleaseDir, fi.RelativeFilePath);
+            fi.PublishFileAbsolutePath = Path.Combine(webProject!.ReleaseDir, fi.PublishFileRelativePath);
+
+            //Logger.Info(fi.ToJsonString(true));
         }
-        //按照 AbsoluteFilePath 去重
+        //按照 PublishFileAbsolutePath 去重
         return fileInfos.Distinct(new DeployFileInfoComparer()).ToList();
     }
 

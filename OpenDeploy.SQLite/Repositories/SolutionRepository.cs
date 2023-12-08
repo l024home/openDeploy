@@ -39,9 +39,28 @@ public class SolutionRepository(OpenDeployDbContext context)
         await context.SaveChangesAsync();
     }
 
-    /// <summary> 获取上次发布对应的提交记录 </summary>
-    public PublishRecord? GetLastPublishCommit(int solutionId)
+    /// <summary> 获取上次发布记录 </summary>
+    public async Task<PublishRecord?> GetLastPublishAsync(int solutionId)
     {
-        return context.PublishRecords.Where(a => a.SolutionId == solutionId).OrderByDescending(a => a.PublishTime).FirstOrDefault();
+        return await context.PublishRecords
+                            .Where(a => a.SolutionId == solutionId)
+                            .OrderByDescending(a => a.PublishTime)
+                            .FirstOrDefaultAsync();
+    }
+
+    /// <summary>
+    /// 手动添加第一次发布记录
+    /// </summary>
+    public async Task SaveFirstPublishAsync(int solutionId, string solutionName, string commitId)
+    {
+        var record = new PublishRecord
+        {
+            SolutionId = solutionId,
+            SolutionName = solutionName,
+            GitCommitId = commitId,
+            PublishTime = DateTime.Now,
+        };
+        await context.PublishRecords.AddAsync(record);
+        await context.SaveChangesAsync();
     }
 }

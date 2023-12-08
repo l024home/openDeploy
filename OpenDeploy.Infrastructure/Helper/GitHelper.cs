@@ -63,4 +63,22 @@ public class GitHelper
         var diff = repo.Diff.Compare<Patch>(lastCommit?.Tree, DiffTargets.Index);
         return [.. diff];
     }
+
+    /// <summary>
+    /// 获取提交
+    /// </summary>
+    public static Commit? GetCommit(string repoPath, string commitId)
+    {
+        var repo = GetRepo(repoPath);
+        return repo.Lookup<Commit>(commitId);
+    }
+
+    /// <summary>
+    /// 判断提交是否存在
+    /// </summary>
+    public static bool ExistsCommit(string repoPath, string commitId)
+    {
+        var commit = GetCommit(repoPath, commitId);
+        return commit != null;
+    }
 }
