@@ -63,12 +63,20 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
     public async Task SendAsync(string endpoint, bool sync = false, byte[]? body = null)
     {
         var message = NettyMessage.Create(endpoint, sync, body);
-        if (sync)
+        await SendAsync(message);
+    }
+
+    /// <summary>
+    /// 发送消息
+    /// </summary>
+    public async Task SendAsync(NettyMessage message)
+    {
+        if (message.IsSync())
         {
             var task = ClientMessageSynchronizer.TryAdd(message);
             try
             {
-                await SendAsync(message);
+                await ConnectAndSendAsync(message);
                 await task;
             }
             catch
@@ -79,14 +87,11 @@ public sealed class NettyClient(string serverHost, int serverPort) : IDisposable
         }
         else
         {
-            await SendAsync(message);
+            await ConnectAndSendAsync(message);
         }
     }
 
-    /// <summary>
-    /// 发送消息
-    /// </summary>
-    private async Task SendAsync(NettyMessage message)
+    private async Task ConnectAndSendAsync(NettyMessage message)
     {
         await TryConnectAsync();
         await _channel!.WriteAndFlushAsync(message);

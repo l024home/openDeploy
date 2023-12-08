@@ -81,7 +81,7 @@
 
                         <ListView
                             Width="700"
-                            Height="200"
+                            MaxHeight="200"
                             ItemsSource="{Binding ChangesSinceLastCommit}"
                             Style="{StaticResource ListView.Small}"
                             Visibility="{Binding ChangesSinceLastCommit.Count, Converter={StaticResource DataCountToVisibilityConverter}}">
@@ -109,7 +109,7 @@
 
                         <ListView
                             Width="700"
-                            Height="200"
+                            MaxHeight="200"
                             ItemsSource="{Binding PublishFiles}"
                             Style="{StaticResource ListView.Small}"
                             Visibility="{Binding PublishFiles.Count, Converter={StaticResource DataCountToVisibilityConverter}}">

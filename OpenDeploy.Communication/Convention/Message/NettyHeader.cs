@@ -16,4 +16,7 @@ public class NettyHeader
 
     /// <summary> 序列化为JSON字符串 </summary>
     public override string ToString() => this.ToJsonString();
+
+    public NettyHeader() { }
+    public NettyHeader(string endpoint) { EndPoint = endpoint; }
 }

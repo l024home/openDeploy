@@ -60,6 +60,7 @@ public class DefaultDecoder : MessageToMessageDecoder<IByteBuffer>
         {
             Header = header,
             Body = bodyBytes,
+            RawHeaderString = rawHeaderString,
         };
 
         output.Add(message);

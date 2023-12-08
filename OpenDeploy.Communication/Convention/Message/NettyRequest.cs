@@ -26,7 +26,7 @@ public class NettyRequest
         NettyContext = context;
         Header = message.Header;
         Body = message.Body;
-        RawHeaderString = message.Header.ToString(); 
+        RawHeaderString = message.RawHeaderString;
 
         var splitResult = message.Header.EndPoint.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (splitResult.Length != 2)

@@ -5,6 +5,8 @@ namespace OpenDeploy.Communication.Convention;
 /// <summary> Netty消息 </summary>
 public class NettyMessage
 {
+    public string RawHeaderString { get; init; } = string.Empty;
+
     /// <summary> 消息头 </summary>
     public NettyHeader Header { get; init; } = default!;
 

@@ -2,6 +2,7 @@
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Microsoft.Extensions.Hosting;
 using OpenDeploy.Communication.Codec;
 using OpenDeploy.Infrastructure;
 
@@ -10,12 +11,19 @@ namespace OpenDeploy.Server;
 /// <summary>
 /// Netty服务器提供者
 /// </summary>
-public static class NettyServer
+public class NettyServer
 {
+    public static IHost AppHost { get; private set; } = default!;
+
+    public NettyServer(IHost host)
+    {
+        AppHost = host;
+    }
+
     /// <summary>
     /// 开启Netty服务
     /// </summary>
-    public static async Task RunAsync(int port = 20007)
+    public async Task RunAsync(int port = 20007)
     {
         var bossGroup = new MultithreadEventLoopGroup(1);
         var workerGroup = new MultithreadEventLoopGroup();

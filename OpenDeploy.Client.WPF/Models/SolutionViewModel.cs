@@ -11,7 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenDeploy.Client.Dialogs;
 using OpenDeploy.Client.Helper;
 using OpenDeploy.Client.WPF;
+using OpenDeploy.Communication.Convention;
 using OpenDeploy.Domain.Convention;
+using OpenDeploy.Domain.NettyHeaders;
 using OpenDeploy.Infrastructure;
 using OpenDeploy.Infrastructure.Extensions;
 using OpenDeploy.SQLite;
@@ -114,46 +116,113 @@ public partial class SolutionViewModel : ObservableObject
         quickDeployDialog = Dialog.Show(new QuickDeployDialog(this));
     }
 
-
-
     /// <summary> 确定发布 </summary>
     [RelayCommand]
     private async Task OkPublishSolution()
     {
-        var releaseDir = webProject!.ReleaseDir;
-
-        if (FirstRelease)
+        var loading = Loading.Show();
+        try
         {
-            if (string.IsNullOrEmpty(FirstPublishGitCommitId))
+            //首次发布
+            if (FirstRelease)
             {
-                Growl.ClearGlobal();
-                Growl.Warning($"请输入Git提交ID");
+                await RunFirstPublishAsync();
                 return;
             }
-
-            if (!GitHelper.ExistsCommit(GitRepositoryPath, FirstPublishGitCommitId))
-            {
-                Growl.ClearGlobal();
-                Growl.Warning($"请输入正确的Git提交ID");
-                return;
-            }
-
-            //保存首次人工发布记录
-            await solutionRepo.SaveFirstPublishAsync(Id, SolutionName, FirstPublishGitCommitId);
-
-            Growl.SuccessGlobal($"操作成功");
-
-            //var zipPath = Path.Combine(Environment.CurrentDirectory, $"{Guid.NewGuid()}.zip");
-
-            //ZipFile.CreateFromDirectory(releaseDir, zipPath);
-
-            //ShellUtil.ExplorerFile(zipPath);
-
+            await RunPublishAsync();
+        }
+        finally
+        {
+            loading.Close();
             quickDeployDialog?.Close();
+        }
+    }
 
+    /// <summary>
+    /// 首次人工发布,只记录提交Id
+    /// </summary>
+    private async Task RunFirstPublishAsync()
+    {
+        if (string.IsNullOrEmpty(FirstPublishGitCommitId))
+        {
+            Growl.ClearGlobal();
+            Growl.Warning($"请输入Git提交ID");
+            return;
+        }
+        if (!GitHelper.ExistsCommit(GitRepositoryPath, FirstPublishGitCommitId))
+        {
+            Growl.ClearGlobal();
+            Growl.Warning($"请输入正确的Git提交ID");
+            return;
+        }
+        //保存首次人工发布记录
+        await solutionRepo.SaveFirstPublishAsync(Id, SolutionName, FirstPublishGitCommitId);
+        Growl.SuccessGlobal($"操作成功");
+    }
+
+    /// <summary>
+    /// 非首次发布
+    /// </summary>
+    private async Task RunPublishAsync()
+    {
+        if (PublishFiles == null || PublishFiles.Count == 0)
+        {
+            Growl.ClearGlobal();
+            Growl.WarningGlobal("没有需要发布的文件");
             return;
         }
 
+        foreach (var file in PublishFiles)
+        {
+            if (!File.Exists(file.PublishFileAbsolutePath))
+            {
+                Growl.ClearGlobal();
+                Growl.ErrorGlobal($"文件不存在,请检查发布目录是否包含该文件,请确认项目包含了该文件,重新编译后重试: \n {file.PublishFileAbsolutePath}");
+                return;
+            }
+        }
+
+        //待发布文件打包zip
+        var zipResult = await ZipHelper.CreateZipAsync(PublishFiles.Select(a => new ZipFileInfo(a.PublishFileAbsolutePath, a.PublishFileRelativePath)));
+
+        try
+        {
+            //读取zip字节数组,填充到 NettyMessage 的 Body
+            var body = await File.ReadAllBytesAsync(zipResult.FullFileName);
+
+            //NettyHeader
+            var header = new DeployRequestHeader()
+            {
+                Files = PublishFiles,
+                SolutionName = SolutionName,
+                ProjectName = webProject!.ProjectName,
+                ZipFileName = zipResult.FileName,
+            };
+
+            var nettyMessage = new NettyMessage { Header = header, Body = body };
+
+            //创建 NettyClient
+            Logger.Info("开始发送");
+            using var nettyClient = new NettyClient("127.0.0.1", 20007);
+            await nettyClient.SendAsync(nettyMessage);
+            Logger.Info("完成发送");
+
+            Growl.SuccessGlobal($"发布成功");
+        }
+        catch (Exception ex)
+        {
+            Growl.ClearGlobal();
+            Growl.ErrorGlobal(ex.Message);
+        }
+        finally
+        {
+            _ = Task.Run(async () =>
+            {
+                //ShellUtil.ExplorerFile(zipPath);
+                await Task.Delay(100);
+                File.Delete(zipResult.FullFileName);
+            });
+        }
     }
 
 
