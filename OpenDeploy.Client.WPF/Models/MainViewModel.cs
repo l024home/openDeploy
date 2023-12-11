@@ -50,7 +50,7 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
                 ProjectDir = p.ProjectDir,
                 ReleaseDir = p.ReleaseDir,
                 IsWeb = p.IsWeb,
-            }).ToList()
+            }).OrderByDescending(a => a.IsWeb).ToList()
         }).ToList();
 
         await Application.Current.Dispatcher.InvokeAsync(() =>

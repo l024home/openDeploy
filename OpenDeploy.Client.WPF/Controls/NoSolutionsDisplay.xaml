@@ -21,7 +21,7 @@
             VerticalAlignment="Center"
             FontSize="25"
             Foreground="Black">
-            请先配置解决方案
+            请配置待发布项目的Git路径
         </TextBlock>
 
         <Button

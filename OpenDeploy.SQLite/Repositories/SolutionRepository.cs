@@ -55,6 +55,7 @@ public class SolutionRepository(OpenDeployDbContext context)
     {
         var record = new PublishRecord
         {
+            Id = Guid.NewGuid(),
             SolutionId = solutionId,
             SolutionName = solutionName,
             GitCommitId = commitId,
