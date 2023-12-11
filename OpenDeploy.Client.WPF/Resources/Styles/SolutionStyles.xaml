@@ -174,7 +174,7 @@
                         <Button
                             Margin="0,0,15,0"
                             Command="{Binding OpenSetProjectReleaseDirDialogCommand}"
-                            Content="配置发布目录"
+                            Content="项目发布配置"
                             Visibility="{Binding IsWeb, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <Button
                             Margin="0,0,15,0"

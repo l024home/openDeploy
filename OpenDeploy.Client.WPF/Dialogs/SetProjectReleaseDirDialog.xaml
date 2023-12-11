@@ -8,7 +8,6 @@
     xmlns:models="clr-namespace:OpenDeploy.Client.Models"
     xmlns:o="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     Width="600"
-    Height="200"
     d:DataContext="{d:DesignInstance Type=models:ProjectViewModel}"
     hc:Dialog.Token="DialogContainer"
     Background="White"
@@ -23,18 +22,45 @@
     </Border.Resources>
 
     <hc:DialogContainer>
-        <hc:SimplePanel>
 
-            <StackPanel Margin="25">
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+
+
+            <hc:UniformSpacingPanel
+                Margin="35"
+                hc:TitleElement.TitleWidth="530"
+                ChildWrapping="Wrap"
+                Spacing="12">
                 <TextBox
-                    Margin="0,25,0,0"
-                    hc:InfoElement.Title="设置项目发布路径"
+                    Width="530"
+                    hc:InfoElement.Title="设置本地项目发布路径"
                     Style="{StaticResource TextBoxExtend}"
                     Text="{Binding ReleaseDir}" />
-            </StackPanel>
+
+                <TextBox
+                    Width="530"
+                    hc:InfoElement.Title="设置自动发布服务的IP"
+                    Style="{StaticResource TextBoxExtend}"
+                    Text="{Binding ServerIp}" />
+
+                <TextBox
+                    Width="530"
+                    hc:InfoElement.Title="设置自动发布服务的端口(服务默认端口: 20007)"
+                    Style="{StaticResource TextBoxExtend}"
+                    Text="{Binding ServerPort}" />
+            </hc:UniformSpacingPanel>
+
+
+
 
             <!--  确定,取消  -->
             <StackPanel
+                Grid.Row="1"
                 Margin="0,0,0,15"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
@@ -47,6 +73,7 @@
                     Style="{StaticResource ButtonInfo}" />
                 <Button
                     Width="120"
+                    Margin="0,0,0,0"
                     Command="{Binding OkSetProjectReleaseDirCommand}"
                     Content="确定"
                     Style="{StaticResource ButtonPrimary}" />
@@ -65,6 +92,8 @@
                 Foreground="{DynamicResource PrimaryBrush}"
                 Style="{StaticResource ButtonIcon}"
                 ToolTip="关闭" />
-        </hc:SimplePanel>
+
+        </Grid>
+
     </hc:DialogContainer>
 </Border>

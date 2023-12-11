@@ -27,4 +27,10 @@ public class Project
 
     /// <summary> 是否Web项目 </summary>
     public bool IsWeb { get;set; }
+
+    /// <summary> 自动发布服务器的IP地址 </summary>
+    public string ServerIp { get; set; } = string.Empty;
+
+    /// <summary> 自动发布服务器的端口 </summary>
+    public int ServerPort { get; set; }
 }

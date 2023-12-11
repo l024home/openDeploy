@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,27 +17,31 @@ public partial class ProjectViewModel : ObservableObject
 {
     /// <summary> 项目Id </summary>
     [ObservableProperty]
-    public Guid projectId;
+    private Guid projectId;
 
     /// <summary> 项目名称 </summary>
     [ObservableProperty]
-    public string projectName = string.Empty;
+    private string projectName = string.Empty;
 
     /// <summary> 项目所在文件夹 </summary>
     [ObservableProperty]
-    public string projectDir = string.Empty;
+    private string projectDir = string.Empty;
 
     /// <summary> 项目发布输出文件夹 </summary>
     [ObservableProperty]
-    public string releaseDir = string.Empty;
+    private string releaseDir = string.Empty;
 
     /// <summary> 是否Web项目 </summary>
     [ObservableProperty]
-    public bool isWeb;
+    private bool isWeb;
 
+    /// <summary> Web项目发布对应的服务器IP地址(自动发布部署的服务器地址) </summary>
+    [ObservableProperty]
+    private string serverIp = string.Empty;
 
-
-
+    /// <summary> 自动发布部署的服务器端口 </summary>
+    [ObservableProperty]
+    private int serverPort = 20007;
 
 
     /// <summary>
@@ -80,7 +86,7 @@ public partial class ProjectViewModel : ObservableObject
     private Dialog? setProjectReleaseDirDialog;
 
     /// <summary>
-    /// 设置项目发布路径 - 打开弹窗
+    /// 设置项目发布信息 - 打开弹窗
     /// </summary>
     [RelayCommand]
     private void OpenSetProjectReleaseDirDialog()
@@ -89,25 +95,48 @@ public partial class ProjectViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 设置项目发布路径
+    /// 设置项目发布信息
     /// </summary>
     [RelayCommand]
     private async Task OkSetProjectReleaseDir()
     {
-        if (string.IsNullOrEmpty(ReleaseDir) || !Directory.Exists(ReleaseDir))
+        try
+        {
+            ThrowIfConfigIsInvalid();
+        }
+        catch (Exception ex)
         {
             Growl.ClearGlobal();
-            Growl.ErrorGlobal("请正确设置项目发布路径");
+            Growl.WarningGlobal(ex.Message);
             return;
         }
 
         var solutionRepo = Program.AppHost.Services.GetRequiredService<SolutionRepository>();
-        await solutionRepo.UpdateProjectReleaseDir(ProjectId, ReleaseDir);
+        await solutionRepo.UpdateProjectReleaseInfo(ProjectId, ReleaseDir, ServerIp, ServerPort);
 
         setProjectReleaseDirDialog?.Close();
 
         Growl.SuccessGlobal("操作成功");
     }
 
+    /// <summary>
+    /// 检查项目配置
+    /// </summary>
+    public void ThrowIfConfigIsInvalid()
+    {
+        if (string.IsNullOrEmpty(ReleaseDir) || !Directory.Exists(ReleaseDir))
+        {
+            throw new Exception("请正确设置Web项目的发布路径");
+        }
 
+        if (string.IsNullOrEmpty(ServerIp) || !IPAddress.TryParse(ServerIp, out _))
+        {
+            throw new Exception("请正确设置Web项目的服务器的IP地址");
+        }
+
+        if (ServerPort <= 0 || ServerPort > 65535)
+        {
+            throw new Exception("请正确设置Web项目对应的自动发布工具在服务器的端口");
+        }
+    }
 }

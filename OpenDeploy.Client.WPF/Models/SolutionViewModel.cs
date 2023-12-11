@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Net;
 using System.Threading.Channels;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -78,10 +79,15 @@ public partial class SolutionViewModel : ObservableObject
             Growl.ErrorGlobal("暂未发现Web项目,默认规则是必须带web.config的才是Web项目");
             return;
         }
-        if (string.IsNullOrEmpty(webProject.ReleaseDir))
+
+        try
+        {
+            webProject.ThrowIfConfigIsInvalid();
+        }
+        catch (Exception ex)
         {
             Growl.ClearGlobal();
-            Growl.ErrorGlobal("请配置Web项目的发布目录");
+            Growl.WarningGlobal(ex.Message);
             return;
         }
 
@@ -198,7 +204,7 @@ public partial class SolutionViewModel : ObservableObject
 
             //创建 NettyClient
             Logger.Info("开始发送");
-            using var nettyClient = new NettyClient("127.0.0.1", 20007);
+            using var nettyClient = new NettyClient(webProject.ServerIp, webProject.ServerPort);
             await nettyClient.SendAsync(nettyMessage);
             Logger.Info("完成发送");
 
@@ -212,12 +218,12 @@ public partial class SolutionViewModel : ObservableObject
         }
         finally
         {
-            _ = Task.Run(async () =>
-            {
-                ShellUtil.ExplorerFile(zipResult.FullFileName);
-                await Task.Delay(1000);
-                File.Delete(zipResult.FullFileName);
-            });
+#if DEBUG
+            //测试环境,打开zip所在文件夹,一秒后删除zip
+            ShellUtil.ExplorerFile(zipResult.FullFileName);
+            await Task.Delay(1000);
+#endif
+            File.Delete(zipResult.FullFileName);
             loading.Close();
         }
     }

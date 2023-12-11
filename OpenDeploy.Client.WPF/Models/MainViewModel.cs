@@ -50,6 +50,8 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
                 ProjectDir = p.ProjectDir,
                 ReleaseDir = p.ReleaseDir,
                 IsWeb = p.IsWeb,
+                ServerIp = p.ServerIp,
+                ServerPort = p.ServerPort,
             }).OrderByDescending(a => a.IsWeb).ToList()
         }).ToList();
 

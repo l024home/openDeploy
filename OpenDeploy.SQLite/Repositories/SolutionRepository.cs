@@ -27,8 +27,8 @@ public class SolutionRepository(OpenDeployDbContext context)
         return await context.Solutions.Include(a => a.Projects).ToListAsync();
     }
 
-    /// <summary> 更新项目的发布目录 </summary>
-    public async Task UpdateProjectReleaseDir(Guid projectId, string dir)
+    /// <summary> 更新项目的发布信息 </summary>
+    public async Task UpdateProjectReleaseInfo(Guid projectId, string dir, string serverIp, int serverPort)
     {
         var project = await context.Projects.FirstOrDefaultAsync(a => a.Id == projectId);
         if (project == null)
@@ -36,6 +36,8 @@ public class SolutionRepository(OpenDeployDbContext context)
             throw new Exception("为找到相关的项目信息");
         }
         project.ReleaseDir = dir;
+        project.ServerIp = serverIp;
+        project.ServerPort = serverPort;
         await context.SaveChangesAsync();
     }
 
