@@ -59,6 +59,9 @@ public partial class SolutionViewModel : ObservableObject
     [ObservableProperty]
     private bool firstRelease;
 
+    /// <summary> 最后一次Git提交 </summary>
+    private Commit? lastGitCommit = null;
+
     /// <summary> Web项目视图模型 </summary>
     private ProjectViewModel? webProject = default!;
 
@@ -91,6 +94,15 @@ public partial class SolutionViewModel : ObservableObject
             return;
         }
 
+        //获取最近一次提交
+        lastGitCommit = GitHelper.GetLastCommit(GitRepositoryPath);
+        if (lastGitCommit == null)
+        {
+            Growl.ClearGlobal();
+            Growl.WarningGlobal("暂未发现Git提交记录");
+            return;
+        }
+
         //获取上次发布记录
         var lastPublish = await solutionRepo.GetLastPublishAsync(SolutionId);
 
@@ -105,17 +117,28 @@ public partial class SolutionViewModel : ObservableObject
             FirstRelease = false;
             LastPublishTime = lastPublish.PublishTime.ToString("yyyy-MM-dd HH:mm:ss");
 
+            if (lastPublish.GitCommitId == lastGitCommit.Sha)
+            {
+                Growl.WarningGlobal("自上次发布以来暂无新的提交记录");
+                return;
+            }
+
             //获取自上次发布以来的改动
             var changes = GitHelper.GetChangesSinceLastPublish(GitRepositoryPath, lastPublish?.GitCommitId);
             if (changes.IsEmpty())
             {
-                Growl.WarningGlobal("暂无提交记录");
+                Growl.WarningGlobal("自上次发布以来暂无改动的文件");
                 return;
             }
             ChangesSinceLastCommit = changes;
 
             //从Git变化解析出待发布的文件
             var files = GetPublishFiles(changes.Select(a => a.Path.Replace("/", "\\")));
+            if (changes.IsEmpty())
+            {
+                Growl.WarningGlobal("自上次发布以来暂无需要发布的文件");
+                return;
+            }
             PublishFiles = files;
         }
 
@@ -209,6 +232,11 @@ public partial class SolutionViewModel : ObservableObject
             Logger.Info("完成发送");
 
             Growl.SuccessGlobal($"发布成功");
+
+            //保存发布记录
+            await solutionRepo.SaveFirstPublishAsync(SolutionId, SolutionName, lastGitCommit!.Sha);
+            Growl.SuccessGlobal($"操作成功");
+
             quickDeployDialog?.Close();
         }
         catch (Exception ex)

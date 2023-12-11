@@ -65,12 +65,21 @@ public class GitHelper
     }
 
     /// <summary>
-    /// 获取提交
+    /// 根据提交ID获取提交
     /// </summary>
     public static Commit? GetCommit(string repoPath, string commitId)
     {
         var repo = GetRepo(repoPath);
         return repo.Lookup<Commit>(commitId);
+    }
+
+    /// <summary>
+    /// 获取当前提交(最后一次提交)
+    /// </summary>
+    public static Commit? GetLastCommit(string repoPath)
+    {
+        var repo = GetRepo(repoPath);
+        return repo.Commits.FirstOrDefault();
     }
 
     /// <summary>
