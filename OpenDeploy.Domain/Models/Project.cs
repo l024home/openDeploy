@@ -8,10 +8,10 @@ namespace OpenDeploy.Domain.Models;
 public class Project
 {
     [Key]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary> 解决方案ID </summary>
-    public int SolutionId { get; set; }
+    public Guid SolutionId { get; set; }
 
     /// <summary> 解决方案名称 </summary>
     public string SolutionName { get; set; } = string.Empty;

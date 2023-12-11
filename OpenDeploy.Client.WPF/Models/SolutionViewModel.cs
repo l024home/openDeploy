@@ -24,7 +24,7 @@ namespace OpenDeploy.Client.Models;
 public partial class SolutionViewModel : ObservableObject
 {
     [ObservableProperty]
-    private int id;
+    private Guid solutionId;
 
     /// <summary> 解决方案名称 </summary>
     [ObservableProperty]
@@ -86,7 +86,7 @@ public partial class SolutionViewModel : ObservableObject
         }
 
         //获取上次发布记录
-        var lastPublish = await solutionRepo.GetLastPublishAsync(Id);
+        var lastPublish = await solutionRepo.GetLastPublishAsync(SolutionId);
 
         //没有发布过,本次将执行首次发布
         if (lastPublish == null)
@@ -148,7 +148,7 @@ public partial class SolutionViewModel : ObservableObject
             return;
         }
         //保存首次人工发布记录
-        await solutionRepo.SaveFirstPublishAsync(Id, SolutionName, FirstPublishGitCommitId);
+        await solutionRepo.SaveFirstPublishAsync(SolutionId, SolutionName, FirstPublishGitCommitId);
         Growl.SuccessGlobal($"操作成功");
         quickDeployDialog?.Close();
     }

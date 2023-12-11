@@ -15,7 +15,7 @@ public partial class ProjectViewModel : ObservableObject
 {
     /// <summary> 项目Id </summary>
     [ObservableProperty]
-    public int id;
+    public Guid projectId;
 
     /// <summary> 项目名称 </summary>
     [ObservableProperty]
@@ -102,7 +102,7 @@ public partial class ProjectViewModel : ObservableObject
         }
 
         var solutionRepo = Program.AppHost.Services.GetRequiredService<SolutionRepository>();
-        await solutionRepo.UpdateProjectReleaseDir(Id, ReleaseDir);
+        await solutionRepo.UpdateProjectReleaseDir(ProjectId, ReleaseDir);
 
         setProjectReleaseDirDialog?.Close();
 

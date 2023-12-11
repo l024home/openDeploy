@@ -8,7 +8,7 @@ namespace OpenDeploy.Domain.Models;
 public class Solution
 {
     [Key]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary> 解决方案名称 </summary>
     public string SolutionName { get; set; } = string.Empty;

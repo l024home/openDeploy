@@ -40,16 +40,16 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
         var solutions = await solutionRepository.GetSolutionAsync();
         var solutionViewModels = solutions.Select(a => new SolutionViewModel
         {
-            Id = a.Id,
+            SolutionId = a.Id,
             GitRepositoryPath = a.GitRepositoryPath,
             SolutionName = a.SolutionName,
             Projects = a.Projects.Select(p => new ProjectViewModel
             {
-                Id = p.Id,
-                IsWeb = p.IsWeb,
-                ProjectDir = p.ProjectDir,
+                ProjectId = p.Id,
                 ProjectName = p.ProjectName,
+                ProjectDir = p.ProjectDir,
                 ReleaseDir = p.ReleaseDir,
+                IsWeb = p.IsWeb,
             }).ToList()
         }).ToList();
 
@@ -127,6 +127,7 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
 
         var solution = new Solution
         {
+            Id = Guid.NewGuid(),
             GitRepositoryPath = gitRepoPath,
             SolutionDir = solutionDir!,
             SolutionName = solutionName
@@ -139,11 +140,13 @@ public partial class MainViewModel(SolutionRepository solutionRepository) : Obse
             var webConfigFiles = Directory.GetFiles(projectDir!, "web.config", SearchOption.TopDirectoryOnly);
             var project = new Project
             {
-                ProjectDir = projectDir!,
+                Id = Guid.NewGuid(),
+                SolutionId = solution.Id,
+                SolutionName = solution.SolutionName,
                 ProjectName = projectName,
+                ProjectDir = projectDir!,
+                ReleaseDir = string.Empty,
                 IsWeb = webConfigFiles != null && webConfigFiles.Length > 0,
-                SolutionName = solutionName,
-                ReleaseDir = string.Empty
             };
             solution.Projects.Add(project);
         }

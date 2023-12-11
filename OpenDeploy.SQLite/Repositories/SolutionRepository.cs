@@ -28,7 +28,7 @@ public class SolutionRepository(OpenDeployDbContext context)
     }
 
     /// <summary> 更新项目的发布目录 </summary>
-    public async Task UpdateProjectReleaseDir(int projectId, string dir)
+    public async Task UpdateProjectReleaseDir(Guid projectId, string dir)
     {
         var project = await context.Projects.FirstOrDefaultAsync(a => a.Id == projectId);
         if (project == null)
@@ -40,7 +40,7 @@ public class SolutionRepository(OpenDeployDbContext context)
     }
 
     /// <summary> 获取上次发布记录 </summary>
-    public async Task<PublishRecord?> GetLastPublishAsync(int solutionId)
+    public async Task<PublishRecord?> GetLastPublishAsync(Guid solutionId)
     {
         return await context.PublishRecords
                             .Where(a => a.SolutionId == solutionId)
@@ -51,7 +51,7 @@ public class SolutionRepository(OpenDeployDbContext context)
     /// <summary>
     /// 手动添加第一次发布记录
     /// </summary>
-    public async Task SaveFirstPublishAsync(int solutionId, string solutionName, string commitId)
+    public async Task SaveFirstPublishAsync(Guid solutionId, string solutionName, string commitId)
     {
         var record = new PublishRecord
         {
