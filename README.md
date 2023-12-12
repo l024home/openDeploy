@@ -22,10 +22,6 @@
 -   **LibGit2Sharp**
 -   **SQLite**
 
-# 效果图
-
-![输入图片说明](https://img2023.cnblogs.com/blog/776421/202312/776421-20231211112921777-91739111.png)
-
 # 代码仓库
 
 > 项目暂且就叫 `OpenDeploy` 吧
@@ -42,6 +38,6 @@
 
 # 完结效果图
 
-![image](https://img2023.cnblogs.com/blog/776421/202312/776421-20231211112857559-8846133.png)
-![image](https://img2023.cnblogs.com/blog/776421/202312/776421-20231211112921777-91739111.png)
-![image](https://img2023.cnblogs.com/blog/776421/202312/776421-20231211112930027-1352501557.png)
+![输入图片说明](OpenDeploy.Client.WPF/Resources/Images/%E5%8F%91%E5%B8%83%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE.png)
+![输入图片说明](OpenDeploy.Client.WPF/Resources/Images/%E9%A6%96%E6%AC%A1%E5%8F%91%E5%B8%83.png)
+![输入图片说明](OpenDeploy.Client.WPF/Resources/Images/%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%97%A5%E5%BF%97.png)
