@@ -21,7 +21,6 @@
 -   **Git**
 -   **LibGit2Sharp**
 -   **SQLite**
--   **AutoMapper**
 
 # 代码仓库
 
@@ -36,3 +35,9 @@
 # 计划
 
 > 一点点的实现构想中的内容,加油
+
+# 完结效果图
+
+![输入图片说明](OpenDeploy.Client.WPF/Resources/Images/%E5%8F%91%E5%B8%83%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE.png)
+![输入图片说明](OpenDeploy.Client.WPF/Resources/Images/%E9%A6%96%E6%AC%A1%E5%8F%91%E5%B8%83.png)
+![输入图片说明](OpenDeploy.Client.WPF/Resources/Images/%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%97%A5%E5%BF%97.png)
