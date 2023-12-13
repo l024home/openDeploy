@@ -27,6 +27,7 @@ public partial class App : Application
         try
         {
             await Program.AppHost.StopAsync();
+            Logger.Warn("App OnExit: AppHost.Stop");
         }
         finally
         {

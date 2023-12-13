@@ -36,8 +36,23 @@ class Program
         var env = AppHost.Services.GetRequiredService<IHostEnvironment>();
         if (env.IsDevelopment())
         {
-            Logger.Warn(env.ToJsonString(true));
+            Logger.Info(env.ToJsonString(true));
         }
+
+        //应用程序声明周期
+        var lifeTime = AppHost.Services.GetRequiredService<IHostApplicationLifetime>();
+        lifeTime.ApplicationStarted.Register(() =>
+        {
+            Logger.Info("ApplicationStarted");
+        });
+        lifeTime.ApplicationStopping.Register(() =>
+        {
+            Logger.Info("ApplicationStopping");
+        });
+        lifeTime.ApplicationStopped.Register(() =>
+        {
+            Logger.Info("ApplicationStopped");
+        });
 
         //启动应用程序
         var app = new App();
