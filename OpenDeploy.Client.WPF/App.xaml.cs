@@ -24,7 +24,14 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
-        await Program.AppHost.StopAsync();
+        try
+        {
+            await Program.AppHost.StopAsync();
+        }
+        finally
+        {
+            Program.AppHost.Dispose();
+        }
     }
 
     /// <summary>

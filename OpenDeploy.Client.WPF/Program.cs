@@ -4,6 +4,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenDeploy.Client.Models;
 using OpenDeploy.Client.WPF;
+using OpenDeploy.Infrastructure;
+using OpenDeploy.Infrastructure.Extensions;
 using OpenDeploy.SQLite;
 
 namespace OpenDeploy.Client;
@@ -11,7 +13,7 @@ namespace OpenDeploy.Client;
 class Program
 {
     private static SplashScreen? _splashScreen;
-    public static IHost AppHost {  get; private set; } = default!;
+    public static IHost AppHost { get; private set; } = default!;
 
     /// <summary> 应用程序的主入口点。 </summary>
     [STAThread]
@@ -24,12 +26,18 @@ class Program
         //依赖注入
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddLogging(options => { options.ClearProviders(); });
-        builder.Services.AddDbContext<OpenDeployDbContext>();
-        builder.Services.AddTransient<SolutionRepository>();
-        builder.Services.AddTransient<SolutionViewModel>();
-        builder.Services.AddTransient<MainViewModel>();
-        builder.Services.AddTransient<MainWindow>();
+        builder.Services.AddSingleton<OpenDeployDbContext>();
+        builder.Services.AddSingleton<SolutionRepository>();
+        builder.Services.AddSingleton<MainViewModel>();
+        builder.Services.AddSingleton<MainWindow>();
         AppHost = builder.Build();
+
+        //环境变量
+        var env = AppHost.Services.GetRequiredService<IHostEnvironment>();
+        if (env.IsDevelopment())
+        {
+            Logger.Warn(env.ToJsonString(true));
+        }
 
         //启动应用程序
         var app = new App();
